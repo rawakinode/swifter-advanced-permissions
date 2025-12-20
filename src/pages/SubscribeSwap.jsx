@@ -1261,7 +1261,6 @@ export default function SubscribeSwap() {
                         ) : !fromAmount || subscribeDisabled ? (
                             "Enter an amount"
                         ) : (
-                            // 🎯 PERUBAHAN: Tombol hanya menampilkan ini
                             "Confirm Permission & Subscribe"
                         )}
                     </span>
