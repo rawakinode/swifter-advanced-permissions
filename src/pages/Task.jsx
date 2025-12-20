@@ -613,7 +613,7 @@ export default function Task() {
                                                 <div className="flex justify-between leading-none">
                                                     <span className="font-semibold">Tx Hash:</span>
                                                     <a
-                                                        href={`https://testnet.monadexplorer.com/tx/${task.txHash}`}
+                                                        href={`https://eth-sepolia.blockscout.com/tx/${task.txHash}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="text-blue-500 underline text-xs"
