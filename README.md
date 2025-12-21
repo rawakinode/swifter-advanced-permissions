@@ -1,7 +1,7 @@
-# Swifter AP (Advanced Permission) - Advanced Permission Swap
+# Swifter AP (Advanced Permission)
 
 ## 📋 Executive Summary
-Swifter AP is a revolutionary swap platform that leverages MetaMask smart accounts with Advanced Permission technology, built on the Sepolia network. The platform delivers a secure, gas-efficient, and flexible automated trading experience with **four main swap modes**: direct, scheduled, price-targeted, and auto-subscription.
+Swiffer AP is a revolutionary swap platform that leverage Smart Account powered by Metamask Advanced Permission (ERC-7715), built on the Ethereum (testnet). The platform delivers a secure, gas-efficient, and flexible automated trading experience with **four main swap modes**: Direct swap, Scheduled swap, Price-targeted swap, and Auto-subscription.
 
 ## 🎯 Core Features
 

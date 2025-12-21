@@ -22,7 +22,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MoreVertical, AlertCircle, Unplug, Loader2, X, CheckCircle, XCircle, Calendar, Clock, Repeat, RefreshCcw, Link2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { MoreVertical, AlertCircle, Unplug, Loader2, X, CheckCircle, XCircle, Calendar, Clock, Repeat, RefreshCcw, Link2, History, ExternalLink } from "lucide-react";
 import { useAccount } from "wagmi";
 import { useAuth } from "@/context/AuthContext";
 
@@ -239,6 +240,288 @@ const ResultPopup = ({ isOpen, onClose, isSuccess, message }) => {
     );
 };
 
+// Subscription Detail Popup Component
+const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
+    if (!isOpen || !subscription) return null;
+
+    const executionHistory = subscription.originalData?.execution_history || [];
+    const historyCount = executionHistory.length;
+
+    // Format status badge color
+    const getStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'success': return 'bg-green-100 text-green-800';
+            case 'failed': return 'bg-red-100 text-red-800';
+            case 'pending': return 'bg-yellow-100 text-yellow-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto"
+            onClick={onClose}
+        >
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-card rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-border shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 className="text-xl font-bold">Subscription Details</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            {subscription.from} → {subscription.to} • {subscription.amount} {subscription.from} per swap
+                        </p>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={onClose}>
+                        <X className="h-5 w-5" />
+                    </Button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Left Column: Subscription Details */}
+                    <div className="space-y-6">
+                        <Card className="p-5">
+                            <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                                <History className="h-5 w-5" />
+                                Subscription Information
+                            </h4>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Status</span>
+                                    <Badge className={`${statusColor[subscription.status] || statusColor.active} text-white`}>
+                                        {subscription.status.toUpperCase()}
+                                    </Badge>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Frequency</span>
+                                    <span className="font-medium">{subscription.frequencyLabel}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Duration</span>
+                                    <span className="font-medium">{subscription.durationLabel}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Next Execution</span>
+                                    <span className="font-medium text-green-500">
+                                        {subscription.status === 'active' ? subscription.nextExecutionTime : "-"}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Progress</span>
+                                    <span className="font-medium">
+                                        {subscription.executed}/{subscription.totalExecutions === 999 ? "∞" : subscription.totalExecutions}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Created</span>
+                                    <span className="font-medium">{subscription.createdTime}</span>
+                                </div>
+                                {subscription.settings && (
+                                    <>
+                                        <div className="pt-3 border-t">
+                                            <h5 className="font-semibold mb-2">Transaction Settings</h5>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-muted-foreground">Slippage Tolerance</span>
+                                                <span className="font-medium">{subscription.settings.slippage || 2}%</span>
+                                            </div>
+                                            <div className="flex justify-between items-center mt-2">
+                                                <span className="text-muted-foreground">Transaction Deadline</span>
+                                                <span className="font-medium">{subscription.settings.deadline || 5} minutes</span>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </Card>
+
+                        {/* Token Information */}
+                        <Card className="p-5">
+                            <h4 className="font-semibold text-lg mb-4">Token Details</h4>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <span className="text-muted-foreground block">From Token</span>
+                                        <span className="font-medium">{subscription.from}</span>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-muted-foreground block">To Token</span>
+                                        <span className="font-medium">{subscription.to}</span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <span className="text-muted-foreground block">Amount per Swap</span>
+                                        <span className="font-medium">{subscription.amount} {subscription.from}</span>
+                                    </div>
+                                </div>
+                                {subscription.originalData?.paymentToken && (
+                                    <div className="pt-3 border-t">
+                                        <h5 className="font-semibold mb-2">Payment Token Info</h5>
+                                        <div className="text-sm space-y-1">
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">Name:</span>
+                                                <span>{subscription.originalData.paymentToken.name}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-muted-foreground">Decimals:</span>
+                                                <span>{subscription.originalData.paymentToken.decimals}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </Card>
+                    </div>
+
+                    {/* Right Column: Execution History */}
+                    <div className="space-y-6">
+                        <Card className="p-5">
+                            <div className="flex justify-between items-center mb-4">
+                                <h4 className="font-semibold text-lg flex items-center gap-2">
+                                    <History className="h-5 w-5" />
+                                    Execution History
+                                </h4>
+                                <Badge variant="outline">
+                                    {historyCount} {historyCount === 1 ? 'Execution' : 'Executions'}
+                                </Badge>
+                            </div>
+
+                            {historyCount > 0 ? (
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-12">#</TableHead>
+                                                <TableHead>Time</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Amount</TableHead>
+                                                <TableHead>Transaction</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {executionHistory.map((execution, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell className="font-medium">
+                                                        {historyCount - index}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="text-sm">
+                                                            {formatTimestamp(execution.timestamp)}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge className={`${getStatusColor(execution.status)} px-2 py-1 text-xs`}>
+                                                            {execution.status || 'Unknown'}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="font-medium">
+                                                            {execution.executedAmount || subscription.amount} {execution.fromToken || subscription.from}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            → {execution.toToken || subscription.to}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {execution.transactionHash ? (
+                                                            <a
+                                                                href={`https://eth-sepolia.blockscout.com/tx/${execution.transactionHash}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-1 text-blue-500 hover:text-blue-600 hover:underline text-sm"
+                                                            >
+                                                                View
+                                                                <ExternalLink className="h-3 w-3" />
+                                                            </a>
+                                                        ) : (
+                                                            <span className="text-xs text-muted-foreground">No hash</span>
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 border rounded-lg bg-muted/20">
+                                    <History className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                                    <p className="text-muted-foreground font-medium">No execution history yet</p>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        This subscription hasn't been executed yet
+                                    </p>
+                                </div>
+                            )}
+
+                            {historyCount > 0 && (
+                                <div className="mt-4 pt-4 border-t">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-muted-foreground">Total Executions:</span>
+                                        <span className="font-medium">{historyCount}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm mt-1">
+                                        <span className="text-muted-foreground">Last Execution:</span>
+                                        <span className="font-medium">
+                                            {executionHistory.length > 0 
+                                                ? formatTimestamp(executionHistory[0].timestamp)
+                                                : 'Never'}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                        </Card>
+
+                        {/* Summary Card */}
+                        <Card className="p-5">
+                            <h4 className="font-semibold text-lg mb-4">Summary</h4>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Subscription ID</span>
+                                    <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                                        {subscription.id.slice(0, 8)}...{subscription.id.slice(-8)}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Wallet Address</span>
+                                    <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
+                                        {subscription.originalData?.wallet_address?.slice(0, 6)}...{subscription.originalData?.wallet_address?.slice(-4)}
+                                    </span>
+                                </div>
+                                {subscription.lastExecutionHash && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Last Transaction</span>
+                                        <a
+                                            href={`https://eth-sepolia.blockscout.com/tx/${subscription.lastExecutionHash}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-blue-500 hover:text-blue-600 hover:underline text-xs"
+                                        >
+                                            {`${subscription.lastExecutionHash.slice(0, 8)}...${subscription.lastExecutionHash.slice(-8)}`}
+                                            <ExternalLink className="h-3 w-3" />
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </Card>
+                    </div>
+                </div>
+
+                <div className="mt-8 pt-6 border-t flex justify-end">
+                    <Button onClick={onClose} className="px-6">
+                        Close Details
+                    </Button>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
 export default function MySubscription() {
     const [activeStatus, setActiveStatus] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
@@ -255,6 +538,10 @@ export default function MySubscription() {
         success: false,
         message: ""
     });
+
+    // State untuk detail popup
+    const [detailPopupOpen, setDetailPopupOpen] = useState(false);
+    const [selectedSubscriptionDetail, setSelectedSubscriptionDetail] = useState(null);
 
     const statuses = ["all", "active", "canceled", "completed", "expired"];
 
@@ -347,7 +634,7 @@ export default function MySubscription() {
                 executed: executed,
                 nextExecution: nextExecution,
                 nextExecutionTime,
-                lastExecutionHash: sub.execution_history?.[0]?.txHash || null,
+                lastExecutionHash: sub.lastExecutionHash || sub.execution_history?.[0]?.transactionHash || null,
                 createdTime: formatTimestamp(sub.created_at),
                 settings: sub.settings || {},
                 originalData: sub
@@ -429,6 +716,18 @@ export default function MySubscription() {
     // Handler to close result popup
     const handleCloseResultPopup = () => {
         setResultPopup(prev => ({ ...prev, open: false }));
+    };
+
+    // Handler to open detail popup
+    const handleOpenDetailPopup = (subscription) => {
+        setSelectedSubscriptionDetail(subscription);
+        setDetailPopupOpen(true);
+    };
+
+    // Handler to close detail popup
+    const handleCloseDetailPopup = () => {
+        setDetailPopupOpen(false);
+        setSelectedSubscriptionDetail(null);
     };
 
     // Generate pagination links with ellipsis
@@ -602,12 +901,28 @@ export default function MySubscription() {
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem
                                                             className="text-xs"
+                                                            onClick={() => handleOpenDetailPopup(subscription)}
+                                                        >
+                                                            View Details & History
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            className="text-xs"
                                                             onClick={() => handleOpenCancelDialog(subscription)}
                                                         >
                                                             Cancel Subscription
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
+                                            )}
+                                            {subscription.status !== "active" && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-6 w-6 p-0"
+                                                    onClick={() => handleOpenDetailPopup(subscription)}
+                                                >
+                                                    <History className="h-3 w-3" />
+                                                </Button>
                                             )}
                                         </div>
                                     </CardHeader>
@@ -629,6 +944,11 @@ export default function MySubscription() {
                                                 <AccordionTrigger className="text-xs py-2 hover:no-underline">
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-medium">Subscription Details</span>
+                                                        {subscription.originalData?.execution_history?.length > 0 && (
+                                                            <Badge variant="outline" className="h-4 px-1 text-[10px]">
+                                                                {subscription.originalData.execution_history.length} exec
+                                                            </Badge>
+                                                        )}
                                                     </div>
                                                 </AccordionTrigger>
                                                 <AccordionContent className="pb-0">
@@ -680,7 +1000,7 @@ export default function MySubscription() {
                                                                     <span className="text-xs font-medium">Last Transaction:</span>
                                                                 </div>
                                                                 <a
-                                                                    href={`https://testnet.monadexplorer.com/tx/${subscription.lastExecutionHash}`}
+                                                                    href={`https://eth-sepolia.blockscout.com/tx/${subscription.lastExecutionHash}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     className="text-xs font-semibold text-blue-500 hover:underline"
@@ -710,6 +1030,19 @@ export default function MySubscription() {
                                                             <span className="text-xs text-muted-foreground">
                                                                 {subscription.createdTime}
                                                             </span>
+                                                        </div>
+
+                                                        {/* View Details Button */}
+                                                        <div className="pt-3 border-t border-border/50">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="w-full text-xs h-7"
+                                                                onClick={() => handleOpenDetailPopup(subscription)}
+                                                            >
+                                                                <History className="h-3 w-3 mr-1" />
+                                                                View Full Details & Execution History
+                                                            </Button>
                                                         </div>
                                                     </div>
                                                 </AccordionContent>
@@ -789,6 +1122,13 @@ export default function MySubscription() {
                 onClose={handleCloseResultPopup}
                 isSuccess={resultPopup.success}
                 message={resultPopup.message}
+            />
+
+            {/* Subscription Detail Popup */}
+            <SubscriptionDetailPopup
+                isOpen={detailPopupOpen}
+                onClose={handleCloseDetailPopup}
+                subscription={selectedSubscriptionDetail}
             />
         </div>
     );
