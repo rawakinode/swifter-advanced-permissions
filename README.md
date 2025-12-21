@@ -32,63 +32,148 @@ Swifter AP is a revolutionary swap platform that leverages MetaMask smart accoun
 
 ## ⚡ Core Workflows
 
-### 1️⃣ Advanced Permission Creation Flow
+### 1️⃣ Direct Swap (Immediately) Flow
 
-**Purpose:** Create advanced permissions to grant authority to the backend for swap execution
+**Purpose:** Real-time swap execution with pre-granted permissions
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│              ADVANCED PERMISSION CREATION                    │
+│                    DIRECT SWAP (IMMEDIATELY)                 │
 └─────────────────────────────────────────────────────────────┘
 
-Step 1: Initialization
+Step 1: User Input
 ┌──────────────────────────────────────────────┐
-│ • Validate smart account address             │
-│ • Check wallet connection                    │
-│ • Initialize swap parameters:                │
-│   - Source token & amount                    │
-│   - Target token                             │
-│   - Slippage tolerance                       │
+│ • User enters swap parameters:               │
+│   - Source token (e.g., ETH)                 │
+│   - Target token (e.g., USDC)                │
+│   - Amount to swap                           │
+│ • UI fetches quote from Uniswap Router v3    │
+│ • Displays expected output & price impact    │
 └──────────────────────────────────────────────┘
                     ↓
-Step 2: Quote Fetching
+Step 2: Permission Check
 ┌──────────────────────────────────────────────┐
-│ • Call Uniswap Router v3 for best price      │
-│ • Calculate expected output amount           │
-│ • Get optimal swap route                     │
-│ • Display price impact to user               │
+│ • UI checks current permitted token amount   │
+│ • Compare with required swap amount          │
+│                                               │
+│ IF insufficient permission:                  │
+│   → User must grant permission first         │
+│                                               │
+│ IF sufficient permission:                    │
+│   → Proceed to Step 4                        │
 └──────────────────────────────────────────────┘
                     ↓
-Step 3: Advanced Permission Creation
+Step 3: Grant Permission (If Needed)
 ┌──────────────────────────────────────────────┐
-│ • Generate permission object with:           │
-│   - Permission type:                         │
-│     • erc20-token-periodic (for ERC20)       │
-│     • native-token-periodic (for native)     │
-│   - Period amount & duration                 │
-│   - Start time & expiry                      │
-│   - Justification                            │
-│   - Adjustment allowed flag                  │
-│ • User signs permission via wallet           │
-└──────────────────────────────────────────────┘
-                    ↓
-Step 4: Submission
-┌──────────────────────────────────────────────┐
-│ • Send permission to backend API:            │
+│ User can customize permission:               │
+│ • Token amount (limit for multiple swaps)    │
+│   Example: 1 ETH for several swaps           │
+│ • Period duration                            │
+│ • Expiry date                                │
+│                                               │
+│ • User confirms permission via MetaMask       │
+│ • Permission sent to backend API             │
 │   POST /api/permissions                      │
-│   {                                          │
-│     permission,                              │
-│     metadata                                 │
-│   }                                          │
-│ • Receive confirmation & tracking ID         │
+│ • UI detects updated permission amount       │
+│ • If sufficient, proceed to swap             │
 └──────────────────────────────────────────────┘
                     ↓
-                ✅ Success
+Step 4: Execute Swap
+┌──────────────────────────────────────────────┐
+│ • User clicks "Confirm Swap"                 │
+│ • Backend executes swap using permission     │
+│ • Swap executed via Uniswap Router v3        │
+│ • Permission amount deducted                 │
+│ • Transaction confirmed on-chain             │
+└──────────────────────────────────────────────┘
+                    ↓
+Step 5: Success
+┌──────────────────────────────────────────────┐
+│ • Display success popup                      │
+│ • Show swap details:                         │
+│   - Token pair & amounts                     │
+│   - Transaction hash                         │
+│   - Link to block explorer                   │
+│ • Update balances                            │
+└──────────────────────────────────────────────┘
+                    ↓
+                ✅ Complete
 ```
 
 ---
 
-### 2️⃣ Auto Subscription Flow
+### 2️⃣ Scheduled & Price-Targeted Swap Flow
+
+**Purpose:** Automated swap execution based on time or price conditions
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│           SCHEDULED / PRICE-TARGETED SWAP                    │
+└─────────────────────────────────────────────────────────────┘
+
+Step 1: User Configuration
+┌──────────────────────────────────────────────┐
+│ User Input:                                   │
+│ • Swap type (Scheduled or Price-targeted)    │
+│ • Token pair (e.g., ETH → USDC)              │
+│ • Amount to swap                             │
+│                                               │
+│ For Scheduled:                                │
+│   - Execution date & time                     │
+│                                               │
+│ For Price-targeted:                           │
+│   - Target price                              │
+│   - Expiration date                           │
+└──────────────────────────────────────────────┘
+                    ↓
+Step 2: Quote & Validation
+┌──────────────────────────────────────────────┐
+│ • UI fetches quote from Uniswap Router v3    │
+│ • Displays expected output                   │
+│ • NO permission check required                │
+│   (Permission created automatically)          │
+└──────────────────────────────────────────────┘
+                    ↓
+Step 3: Permission Creation (Automatic)
+┌──────────────────────────────────────────────┐
+│ • System automatically creates permission:    │
+│   - Based on token pair & amount              │
+│   - Based on execution schedule/price         │
+│   - Period & expiry auto-calculated           │
+│   - NOT customizable by user                  │
+│                                               │
+│ • User signs permission via MetaMask          │
+└──────────────────────────────────────────────┘
+                    ↓
+Step 4: Submission to Backend
+┌──────────────────────────────────────────────┐
+│ • All data sent to backend:                   │
+│   POST /api/send_delegation                  │
+│   {                                          │
+│     swap_type,                               │
+│     token_pair,                              │
+│     amount,                                  │
+│     execution_time / target_price,           │
+│     permission                               │
+│   }                                          │
+│ • Stored in database for agent execution     │
+└──────────────────────────────────────────────┘
+                    ↓
+Step 5: Backend Agent Execution
+┌──────────────────────────────────────────────┐
+│ Backend agent monitors and executes:          │
+│ • Scheduled: At specified time               │
+│ • Price-targeted: When target price reached  │
+│ • Uses stored permission to execute swap      │
+│ • Updates task status                        │
+└──────────────────────────────────────────────┘
+                    ↓
+                ✅ Task Queued
+```
+
+---
+
+### 3️⃣ Auto Subscription Flow
 
 **Purpose:** Automatic recurring swap with certain time intervals (DCA strategy)
 
@@ -100,11 +185,15 @@ Step 4: Submission
 Step 1: Configuration
 ┌──────────────────────────────────────────────┐
 │ User Input:                                   │
+│ • Buy token (e.g., USDC)                     │
+│ • Pay with token (e.g., ETH)                 │
+│ • Amount per swap (e.g., 0.01 ETH)           │
 │ • Frequency (Hourly/Daily/Weekly/Monthly)    │
 │ • Duration (1 day to 3 years)                │
-│ • Token pair (e.g., USDC → ETH)              │
-│ • Amount per swap                             │
-│ • Slippage tolerance                          │
+│                                               │
+│ Example:                                      │
+│   "Buy USDC with 0.01 ETH every hour         │
+│    for 1 day"                                 │
 │                                               │
 │ System Calculates:                            │
 │ • Total executions = duration / frequency     │
@@ -121,57 +210,55 @@ Step 2: Validation
 │   (max 5 per account)                         │
 └──────────────────────────────────────────────┘
                     ↓
-Step 3: Advanced Permission Setup
+Step 3: Permission Confirmation
 ┌──────────────────────────────────────────────┐
-│ • Create periodic permission with:            │
-│   - Start time: Now                           │
-│   - End time: Now + duration                  │
+│ • User confirms subscription strategy         │
+│ • System creates periodic permission:         │
 │   - Period duration: frequency interval       │
 │   - Period amount: amount per swap            │
+│   - Start time: Now                           │
+│   - End time: Now + duration                  │
 │   - isAdjustmentAllowed: false                │
 │                                               │
-│ • User signs permission via wallet            │
+│ • User signs permission via MetaMask          │
 └──────────────────────────────────────────────┘
                     ↓
-Step 4: Monitoring
+Step 4: Submission to Backend
 ┌──────────────────────────────────────────────┐
-│ Backend System Tracks:                        │
-│ • Execution count: X / total                  │
-│ • Next run time: timestamp                    │
-│ • Remaining balance check                     │
-│ • Subscription status: ACTIVE/PAUSED/ENDED    │
-│                                               │
-│ User Dashboard Shows:                         │
-│ • Progress bar                                │
-│ • Execution history                           │
-│ • Average price achieved                      │
-│ • Total tokens accumulated                    │
+│ • Subscription data sent to backend:          │
+│   POST /api/send_subscribe_delegation        │
+│   {                                          │
+│     payment_token,                           │
+│     target_token,                            │
+│     amount,                                  │
+│     frequency,                               │
+│     duration,                                │
+│     permission,                              │
+│     strategy                                 │
+│   }                                          │
+│ • Stored in database for subscription agent  │
 └──────────────────────────────────────────────┘
                     ↓
-Step 5: Automatic Execution
+Step 5: Subscription Agent Execution
 ┌──────────────────────────────────────────────┐
-│ When Next Run Time Reached:                   │
-│ • Validate permission still valid             │
-│ • Check remaining permission amount           │
-│ • Fetch current market quote (Uniswap v3)     │
-│ • Execute swap via permission                 │
-│ • Update execution counter                    │
-│ • Calculate next execution time               │
-│ • Update remaining permission amount          │
-│ • Send notification to user                   │
+│ Backend subscription agent:                   │
+│ • Monitors execution schedule                 │
+│ • Executes swap at each interval              │
+│ • Uses permission for token transfer          │
+│ • Fetches current quote (Uniswap v3)          │
+│ • Updates execution count & status            │
+│ • Calculates next execution time              │
 └──────────────────────────────────────────────┘
                     ↓
 Step 6: Progress Tracking
 ┌──────────────────────────────────────────────┐
-│ Real-time Updates:                            │
-│ • In-app execution log                        │
-│ • Performance metrics:                        │
-│   - Average buy price                         │
-│   - Total accumulated                         │
-│                                               │
-│ Completion:                                   │
-│ • Final summary report                        │
-│ • Option to create new subscription           │
+│ User Dashboard Shows:                         │
+│ • Progress: X / total executions              │
+│ • Next execution time                         │
+│ • Execution history                           │
+│ • Average buy price achieved                  │
+│ • Total tokens accumulated                    │
+│ • Subscription status                         │
 └──────────────────────────────────────────────┘
                     ↓
                 ✅ Active
@@ -179,7 +266,7 @@ Step 6: Progress Tracking
 
 ---
 
-### 3️⃣ Execution Flow (Backend)
+### 4️⃣ Execution Flow (Backend)
 
 **Purpose:** Backend service that monitors and executes permissions
 
@@ -224,7 +311,12 @@ Step 3: Execution
 │ 2. Validate quote within slippage             │
 │ 3. Transfer tokens using permission           │
 │ 4. Execute swap via Uniswap Router v3:        │
-│    • Call smart account with permission       │
+│    • Prepare user operation calls              │
+│    • Get gas price from Pimlico client        │
+│    • Send user operation via Pimlico Bundler: │
+│      - Bundler acts as Paymaster               │
+│      - Gas fees paid by Pimlico Paymaster      │
+│      - Agent does NOT pay fees                 │
 │    • Submit transaction to network            │
 │ 5. Wait for confirmation                      │
 │ 6. Update execution status                    │
@@ -238,7 +330,7 @@ Step 4: Confirmation
 │ • Update permission remaining amount          │
 │ • Update task/subscription status             │
 │ • Calculate actual vs expected output         │
-│ • Compute gas cost                            │
+│ • Gas cost covered by Pimlico Paymaster       │
 └──────────────────────────────────────────────┘
                     ↓
                 ✅ Completed
@@ -294,32 +386,60 @@ User Action → Frontend → Backend → Blockchain
 ---
 
 ### Smart Account System
+
+**Session Account Architecture:**
+- Each user has a unique session account (smart account/wallet)
+- Session account is generated deterministically based on user's EOA address
+- Session accounts are isolated per user for security and fund management
+- All permissions and swaps are executed through the user's session account
+
 ```javascript
 // Hybrid implementation with MetaMask Smart Accounts Kit
-const smartAccount = await toMetaMaskSmartAccount({
+// Session account generation for each user
+const sessionAccount = await toMetaMaskSmartAccount({
     client: publicClient,
     implementation: Implementation.Hybrid,
     deployParams: [account.address, [], [], []],
-    deploySalt: salt,
+    deploySalt: userAddress, // Unique salt per user
     signer: { account }
 });
 ```
 
 ### Advanced Permission Framework
 Utilizes MetaMask Advanced Permission to create periodic token permissions:
+
+**Permission Types:**
+- `erc20-token-periodic`: For ERC20 token transfers
+- `native-token-periodic`: For native token transfers
+
+**Permission Characteristics:**
 - **Periodic Permissions**: Time-based recurring execution permissions
-  - `erc20-token-periodic`: For ERC20 token transfers
-  - `native-token-periodic`: For native token transfers
 - **Period Control**: Amount per period and period duration
 - **Time Constraints**: Start time and expiry restrictions
-- **Adjustment Control**: Whether permission amounts can be adjusted
+- **Adjustment Control**: Whether permission amounts can be adjusted (`isAdjustmentAllowed`)
 - **Multi-layer Security**: Signature verification for each permission
 
+**Permission Usage Patterns:**
+1. **Direct Swap**: Pre-granted customizable permissions for immediate swaps
+   - User can customize amount, period, and expiry
+   - Permission checked before swap execution
+   - Can accumulate multiple permissions for same token
+
+2. **Scheduled/Price-targeted**: Auto-created permissions for deferred swaps
+   - Permission created automatically based on swap parameters
+   - Not customizable by user
+   - Stored with swap task for backend agent execution
+
+3. **Auto Subscription**: Periodic permissions for recurring swaps
+   - Permission covers entire subscription duration
+   - Period duration matches subscription frequency
+   - Used by subscription agent for automated execution
+
 ### Gas Optimization
-- Integration with Pimlico for gas sponsorship
-- Bundler client for user operation handling
-- Paymaster integration for gasless transactions
-- Smart account batch operations for efficiency
+- **Pimlico Bundler as Paymaster**: All transactions executed through Pimlico Bundler with Paymaster enabled
+- **Gasless Transactions**: Users and agents don't pay gas fees - covered by Pimlico Paymaster
+- **User Operation Handling**: Efficient execution via Account Abstraction (ERC-4337/ERC-7702)
+- **Smart Account Batch Operations**: Multiple operations bundled for efficiency
 
 ## 🔒 Security Analysis
 
@@ -450,18 +570,21 @@ ACTIVE → IN_USE → PARTIALLY_USED → EXHAUSTED
 ## 🎨 User Experience & Interface
 
 ### Interface Components
-- **SwapBox**: Main swap interface with intuitive token selection
-- **Task Management**: Monitoring and control for all active swaps
+- **SwapBox**: Main swap interface with intuitive token selection and swap type selection
+- **Task Management**: Monitoring and control for all active scheduled/price-targeted swaps
 - **Subscription Manager**: Comprehensive control panel for recurring swaps
 - **Popup System**: Elegant confirmation, success, and error handling
+- **Permission Manager**: Interface for viewing and managing granted permissions
 
 ### User Experience Features
 - **Balance Tracking**: Real-time balance updates across all features
+- **Permission Tracking**: Real-time display of remaining permitted amounts for direct swaps
 - **Token Search**: Filtering and token verification
 - **Percentage Quick-select**: 25%, 50%, 75%, 100% amount selection
 - **Responsive Design**: Mobile-friendly interface
 - **Progress Indicators**: Real-time status for subscription operations
 - **Smart Defaults**: Auto-selection of optimal parameters
+- **Customizable Permissions**: For direct swaps, users can set amount, period, and expiry
 
 ## 💡 Innovations & Advantages
 
@@ -549,10 +672,13 @@ WETH = "0xfff9976782d46cc05630d1f6ebab18b2324d6b14";
 - Sub-5 second execution for price target swaps
 - 99.9% success rate on permission executions
 - 5x user efficiency improvement through automated recurring swaps
+- Flexible permission system allowing multiple direct swaps with single permission grant
 
 ### User Benefits
 - **Time Savings**: Automated execution eliminates manual monitoring
 - **Cost Efficiency**: Gasless operations reduce overall transaction costs
 - **Strategy Implementation**: Support for DCA and recurring investment strategies
 - **Risk Reduction**: Automated execution at optimal conditions
-- **Security**: Granular permission control for enhanced safety
+- **Security**: Granular permission control with per-user session account isolation
+- **Flexibility**: Customizable permissions for direct swaps, automatic permissions for automated swaps
+- **Efficiency**: Reusable permissions for multiple direct swaps without repeated approvals
