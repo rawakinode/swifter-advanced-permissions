@@ -288,11 +288,11 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
                     {/* Left Column: Subscription Details */}
                     <div className="space-y-6">
                         <Card className="p-5">
-                            <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                            <h4 className="font-semibold text-md mb-4 flex items-center gap-2">
                                 <History className="h-5 w-5" />
                                 Subscription Information
                             </h4>
-                            <div className="space-y-4">
+                            <div className="space-y-2 text-xs">
                                 <div className="flex justify-between items-center">
                                     <span className="text-muted-foreground">Status</span>
                                     <Badge className={`${statusColor[subscription.status] || statusColor.active} text-white`}>
@@ -343,8 +343,8 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
 
                         {/* Token Information */}
                         <Card className="p-5">
-                            <h4 className="font-semibold text-lg mb-4">Token Details</h4>
-                            <div className="space-y-4">
+                            <h4 className="font-semibold text-md mb-4">Token Details</h4>
+                            <div className="space-y-2 text-xs">
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <span className="text-muted-foreground block">From Token</span>
@@ -384,7 +384,7 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
                     <div className="space-y-6">
                         <Card className="p-5">
                             <div className="flex justify-between items-center mb-4">
-                                <h4 className="font-semibold text-lg flex items-center gap-2">
+                                <h4 className="font-semibold text-md flex items-center gap-2">
                                     <History className="h-5 w-5" />
                                     Execution History
                                 </h4>
@@ -408,11 +408,11 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
                                         <TableBody>
                                             {executionHistory.map((execution, index) => (
                                                 <TableRow key={index}>
-                                                    <TableCell className="font-medium">
+                                                    <TableCell className="font-medium text-xs">
                                                         {historyCount - index}
                                                     </TableCell>
                                                     <TableCell>
-                                                        <div className="text-sm">
+                                                        <div className="text-xs">
                                                             {formatTimestamp(execution.timestamp)}
                                                         </div>
                                                     </TableCell>
@@ -453,7 +453,7 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
                                 <div className="text-center py-8 border rounded-lg bg-muted/20">
                                     <History className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                                     <p className="text-muted-foreground font-medium">No execution history yet</p>
-                                    <p className="text-sm text-muted-foreground mt-1">
+                                    <p className="text-xs text-muted-foreground mt-1">
                                         This subscription hasn't been executed yet
                                     </p>
                                 </div>
@@ -461,11 +461,11 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
 
                             {historyCount > 0 && (
                                 <div className="mt-4 pt-4 border-t">
-                                    <div className="flex justify-between items-center text-sm">
+                                    <div className="flex justify-between items-center text-xs">
                                         <span className="text-muted-foreground">Total Executions:</span>
                                         <span className="font-medium">{historyCount}</span>
                                     </div>
-                                    <div className="flex justify-between items-center text-sm mt-1">
+                                    <div className="flex justify-between items-center text-xs mt-1">
                                         <span className="text-muted-foreground">Last Execution:</span>
                                         <span className="font-medium">
                                             {executionHistory.length > 0 
@@ -479,8 +479,8 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
 
                         {/* Summary Card */}
                         <Card className="p-5">
-                            <h4 className="font-semibold text-lg mb-4">Summary</h4>
-                            <div className="space-y-3">
+                            <h4 className="font-semibold text-md mb-4">Summary</h4>
+                            <div className="space-y-2 text-xs">
                                 <div className="flex justify-between items-center">
                                     <span className="text-muted-foreground">Subscription ID</span>
                                     <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
