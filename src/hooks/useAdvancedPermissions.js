@@ -70,11 +70,19 @@ export async function isSmartAccountUpgraded() {
             address,
         });
 
+        console.log(code);
+
+
         if (code) {
 
             const delegatorAddress = `0x${code.substring(8)}`;
             const statelessDelegatorAddress = getSmartAccountsEnvironment(chain.id).implementations.EIP7702StatelessDeleGatorImpl;
             const isAccountUpgraded = delegatorAddress.toLowerCase() === statelessDelegatorAddress.toLowerCase();
+
+            console.log(delegatorAddress);
+
+            console.log(statelessDelegatorAddress);
+
 
             if (isAccountUpgraded) {
                 console.log('Account is upgraded to MetaMask Smart Account.');
