@@ -402,14 +402,14 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
                                                 <TableHead>Time</TableHead>
                                                 <TableHead>Status</TableHead>
                                                 <TableHead>Amount</TableHead>
-                                                <TableHead>Transaction</TableHead>
+                                                <TableHead>Hash</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {executionHistory.map((execution, index) => (
                                                 <TableRow key={index}>
                                                     <TableCell className="font-medium text-xs">
-                                                        {historyCount - index}
+                                                        {index+1}
                                                     </TableCell>
                                                     <TableCell>
                                                         <div className="text-xs">
