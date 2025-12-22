@@ -66,7 +66,6 @@ async function processSubscriptions() {
     }
 }
 
-// Eksekusi satu subscription
 async function executeSubscription(subscription) {
     console.log(`Executing subscription ${subscription._id}`);
 
@@ -83,15 +82,20 @@ async function executeSubscription(subscription) {
                 await handleSuccessfulExecution(subscription, hash);
                 console.log(`Subscription ${subscription._id} executed successfully`);
             } else {
-                await handleFailedExecution(subscription, hash, 'Transaction failed');
-                console.log(`Subscription ${subscription._id} transaction failed`);
+                // Langsung catat sebagai failed tanpa percobaan ulang
+                await handleFailedExecution(subscription, hash, 'Transaction failed on-chain');
+                console.log(`Subscription ${subscription._id} transaction failed, marked as failed and moving to next execution`);
             }
         } else {
+            // Langsung catat sebagai failed tanpa percobaan ulang
             await handleFailedExecution(subscription, '', 'No transaction hash received');
+            console.log(`Subscription ${subscription._id} failed to get transaction hash, marked as failed`);
         }
     } catch (error) {
         console.error(`Error executing subscription ${subscription._id}:`, error);
+        // Langsung catat sebagai failed tanpa percobaan ulang
         await handleFailedExecution(subscription, '', error.message);
+        console.log(`Subscription ${subscription._id} encountered error, marked as failed`);
     }
 }
 
@@ -194,58 +198,98 @@ async function handleSuccessfulExecution(subscription, hash) {
 async function handleFailedExecution(subscription, hash, errorMessage) {
     const db = await connectDB();
 
-    // Increment failure count
-    const newFailureCount = (subscription.failureCount || 0) + 1;
+    // Update executed count - TETAP tambah 1 walau gagal
+    const newExecutedCount = subscription.executed + 1;
 
-    // If too many failures, mark as failed
-    if (newFailureCount >= 3) { // Max 3 failures
+    // Hitung waktu eksekusi berikutnya
+    const nextExecutionTimestamp = subscription.nextExecutionTimestamp + subscription.frequency_in_second;
+    const nextExecutionDate = new Date(nextExecutionTimestamp * 1000);
+
+    // Check if subscription should continue (berdasarkan executed count)
+    if (newExecutedCount >= subscription.totalExecutions) {
+        // Subscription completed meskipun ada yang gagal
         await db.collection("subscriptions").updateOne(
             { _id: subscription._id },
             {
                 $set: {
-                    status: "failed",
-                    failureCount: newFailureCount,
-                    lastError: errorMessage,
-                    failedAt: new Date()
+                    status: "completed",
+                    executed: newExecutedCount,
+                    lastExecutionHash: hash,
+                    lastExecutionTime: new Date(),
+                    completedAt: new Date()
                 },
                 $push: {
                     execution_history: {
                         timestamp: new Date(),
                         status: "failed",
                         error: errorMessage,
-                        transactionHash: hash || null
+                        transactionHash: hash || null,
+                        executedAmount: subscription.amount_formatted || subscription.amount,
+                        fromToken: subscription.paymentToken.symbol,
+                        toToken: subscription.targetToken.symbol
                     }
                 }
             }
         );
-        console.log(`Subscription ${subscription._id} marked as failed after ${newFailureCount} failures`);
-    } else {
-        // Retry after delay (e.g., 3 minutes)
-        const retryTimestamp = Math.floor(Date.now() / 1000) + 180; // 3 minutes from now
-        const retryDate = new Date(retryTimestamp * 1000);
-
-        await db.collection("subscriptions").updateOne(
-            { _id: subscription._id },
-            {
-                $set: {
-                    failureCount: newFailureCount,
-                    nextExecution: retryDate.toISOString(),
-                    nextExecutionTimestamp: retryTimestamp,
-                    lastError: errorMessage,
-                    lastRetryTime: new Date()
-                },
-                $push: {
-                    execution_history: {
-                        timestamp: new Date(),
-                        status: "failed",
-                        error: errorMessage,
-                        transactionHash: hash || null
-                    }
-                }
-            }
-        );
-        console.log(`Subscription ${subscription._id} will retry at ${retryDate}`);
+        console.log(`Subscription ${subscription._id} completed all executions (last one failed)`);
+        return;
     }
+
+    // Check if subscription has expired (beyond endTimestamp)
+    if (nextExecutionTimestamp > subscription.duration_in_second) {
+        await db.collection("subscriptions").updateOne(
+            { _id: subscription._id },
+            {
+                $set: {
+                    status: "expired",
+                    executed: newExecutedCount,
+                    lastExecutionHash: hash,
+                    lastExecutionTime: new Date(),
+                    expiredAt: new Date()
+                },
+                $push: {
+                    execution_history: {
+                        timestamp: new Date(),
+                        status: "failed",
+                        error: errorMessage,
+                        transactionHash: hash || null,
+                        executedAmount: subscription.amount_formatted || subscription.amount,
+                        fromToken: subscription.paymentToken.symbol,
+                        toToken: subscription.targetToken.symbol
+                    }
+                }
+            }
+        );
+        console.log(`Subscription ${subscription._id} expired (last execution failed)`);
+        return;
+    }
+
+    // Update untuk eksekusi berikutnya
+    await db.collection("subscriptions").updateOne(
+        { _id: subscription._id },
+        {
+            $set: {
+                executed: newExecutedCount,
+                nextExecution: nextExecutionDate.toISOString(),
+                nextExecutionTimestamp: nextExecutionTimestamp,
+                lastExecutionHash: hash,
+                lastExecutionTime: new Date()
+            },
+            $push: {
+                execution_history: {
+                    timestamp: new Date(),
+                    status: "failed",
+                    error: errorMessage,
+                    transactionHash: hash || null,
+                    executedAmount: subscription.amount_formatted || subscription.amount,
+                    fromToken: subscription.paymentToken.symbol,
+                    toToken: subscription.targetToken.symbol
+                }
+            }
+        }
+    );
+
+    console.log(`Subscription ${subscription._id} (failed) scheduled for next execution at ${nextExecutionDate}`);
 }
 
 // Eksekusi task swap untuk subscription dengan metode baru
