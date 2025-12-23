@@ -17,7 +17,7 @@ const client = createPublicClient({ chain: sepolia, transport: http(sepolia.rpcU
 const app = express();
 const PORT = 3300;
 const JWT_SECRET = process.env.JWT_SECRET || 'aabbccddeessdfsfsrgsegsdfgserg3wegeg7787834t87ff';
-const TOKEN_EXPIRY = '1h'; // 1 jam
+const TOKEN_EXPIRY = '1h';
 
 app.use(cors({
     origin: '*',
@@ -254,11 +254,11 @@ app.get("/all_balance_wallet/:address", async (req, res) => {
         // Filter out null values (token dengan balance 0 atau error)
         const validTokens = tokensWithMeta.filter(token => token !== null);
 
-        // 3) Tambahkan native MON balance
+        // 3) Tambahkan native ETH balance
         const nativeBalance = await client.getBalance({ address });
         const nativeFormatted = formatUnits(nativeBalance, 18);
 
-        // Cek apakah native MON sudah ada di list (jangan duplikat)
+        // Cek apakah native ETH sudah ada di list (jangan duplikat)
         const nativeTokenExists = validTokens.some(token =>
             token.address === "0x0000000000000000000000000000000000000000"
         );
@@ -266,8 +266,8 @@ app.get("/all_balance_wallet/:address", async (req, res) => {
         if (!nativeTokenExists && nativeBalance > 0n) {
             validTokens.unshift({
                 address: "0x0000000000000000000000000000000000000000",
-                symbol: "BASE",
-                name: "BASE ETH",
+                symbol: "ETH",
+                name: "Ethereum",
                 decimals: 18,
                 balance: nativeFormatted
             });
@@ -290,15 +290,15 @@ app.get("/balance/:address", async (req, res) => {
             return res.status(400).json({ error: "Query param 'token' required" });
         }
 
-        // jika tokenQuery = native MON
+        // jika tokenQuery = native 
         if (tokenQuery === "0x0000000000000000000000000000000000000000") {
             const nativeBalance = await client.getBalance({ address });
             const formatted = formatUnits(nativeBalance, 18);
 
             return res.json({
                 address: tokenQuery,
-                symbol: "BASE",
-                name: "BASE ETH",
+                symbol: "ETH",
+                name: "Ethereum",
                 decimals: 18,
                 balance: formatted,
             });
