@@ -9,8 +9,7 @@ import {
 import { erc20Abi } from 'viem';
 import { sepolia } from 'viem/chains';
 
-/* ================= CONFIG ================= */
-
+// Configurations
 export const CONTRACTS = {
   FACTORY: '0x0227628f3F023bb0B980b67D528571c95c6DaC1c',
   QUOTER_V2: '0xEd1f6473345F45b75F8179591dd5bA1888cf2FB3',
@@ -25,13 +24,11 @@ export const NATIVE_ETH = {
   isNative: true
 };
 
-/* ================= CONSTANTS ================= */
-
+// Tiers
 export const FEE_TIERS = [100, 500, 3000, 10000]; // 0.01%, 0.05%, 0.30%, 1%
 export const DEFAULT_FEE_TIERS = [3000, 500, 10000, 100]; // Prioritas default
 
-/* ================= ABI ================= */
-
+// Contract ABI
 export const FACTORY_ABI = [
   {
     name: 'getPool',
@@ -124,8 +121,7 @@ export const SWAP_ROUTER_ABI = [
   }
 ];
 
-/* ================= ERROR TYPES ================= */
-
+// Errors Type
 export class SwapError extends Error {
   constructor(message, code, details = {}) {
     super(message);
@@ -144,8 +140,7 @@ export const ERROR_CODES = {
   NETWORK_ERROR: 'NETWORK_ERROR'
 };
 
-/* ================= HELPERS ================= */
-
+// Helpers
 export const isNativeETH = (address) => {
   if (!address) return false;
   const addr = address.toLowerCase();
@@ -224,8 +219,7 @@ const validateInputs = (tokenIn, tokenOut, amountIn, fee) => {
   }
 };
 
-/* ================= POOL AVAILABILITY CHECK ================= */
-
+// Check pool availablee
 export const checkPoolAvailability = async (publicClient, tokenIn, tokenOut, fee) => {
   try {
     const isInETH = isNativeETH(tokenIn);
@@ -253,8 +247,7 @@ export const checkPoolAvailability = async (publicClient, tokenIn, tokenOut, fee
   }
 };
 
-/* ================= FEE TIER OPTIMIZATION ================= */
-
+// Find best tier
 export const findBestFeeTier = async ({
   publicClient,
   tokenIn,
@@ -346,10 +339,7 @@ export const findBestFeeTier = async ({
   return bestResult;
 };
 
-/* =========================================================
-   🔵 getSwapQuoteData() - OPTIMIZED
-========================================================= */
-
+// Function to get swap quote data
 export async function getSwapQuoteData({
   publicClient,
   tokenIn,
@@ -387,7 +377,6 @@ export async function getSwapQuoteData({
     let bestFeeResult;
     let allFeeOptions;
 
-    // Jika fee ditentukan, gunakan itu
     if (fee !== null) {
       const poolExists = await checkPoolAvailability(publicClient, tokenIn, tokenOut, fee);
       if (!poolExists) {
@@ -447,7 +436,6 @@ export async function getSwapQuoteData({
         amountInWei
       };
     } else {
-      // Cari fee tier terbaik
       const result = await findBestFeeTier({
         publicClient,
         tokenIn,
@@ -469,7 +457,6 @@ export async function getSwapQuoteData({
         );
       }
 
-      // Dapatkan detail tambahan untuk best result
       const tokenInForContract = isInETH ? CONTRACTS.WETH : getAddress(tokenIn);
       const tokenOutForContract = isOutETH ? CONTRACTS.WETH : getAddress(tokenOut);
       const decimalsIn = await getTokenDecimals(publicClient, tokenIn, isInETH);
@@ -490,19 +477,15 @@ export async function getSwapQuoteData({
       };
     }
 
-    // Hitung amountOutMinimum dengan slippage
     const slippageMultiplier = (100 - slippage) / 100;
     const amountOutMin = (bestFeeResult.amountOut * BigInt(Math.floor(slippageMultiplier * 1000000))) / 1000000n;
 
-    // Dapatkan data blockchain
     const blockNumber = await publicClient.getBlockNumber();
     const gasPrice = await publicClient.getGasPrice();
 
-    // Hitung total network fee
     const gasEstimateBigInt = BigInt(bestFeeResult.gasEstimate || 0);
     const totalNetworkFee = gasEstimateBigInt * gasPrice;
 
-    // Siapkan route object
     const route = {
       fills: [
         {
@@ -522,7 +505,6 @@ export async function getSwapQuoteData({
       ]
     };
 
-    // Bangun response utama
     const mainResponse = {
       allowanceTarget: CONTRACTS.SWAP_ROUTER,
       blockNumber: blockNumber.toString(),
@@ -569,7 +551,6 @@ export async function getSwapQuoteData({
       isOutputETH: isOutETH
     };
 
-    // Jika diminta semua opsi, tambahkan ke response
     if (returnAllOptions && allFeeOptions) {
       return {
         ...mainResponse,
@@ -597,10 +578,7 @@ export async function getSwapQuoteData({
   }
 }
 
-/* =========================================================
-   🔵 getSwap() - OPTIMIZED dengan dukungan semua tipe swap
-========================================================= */
-
+// get swap and transcation call data
 export async function getSwap({
   publicClient,
   tokenIn,
@@ -638,7 +616,6 @@ export async function getSwap({
     let bestFeeResult;
     let allFeeOptions;
 
-    // Jika fee ditentukan, gunakan itu
     if (fee !== null) {
       const poolExists = await checkPoolAvailability(publicClient, tokenIn, tokenOut, fee);
       if (!poolExists) {
@@ -693,7 +670,6 @@ export async function getSwap({
         amountInWei
       };
     } else {
-      // Cari fee tier terbaik
       const result = await findBestFeeTier({
         publicClient,
         tokenIn,
@@ -715,7 +691,6 @@ export async function getSwap({
         );
       }
 
-      // Dapatkan detail tambahan untuk best result
       const tokenInForContract = isInETH ? CONTRACTS.WETH : getAddress(tokenIn);
       const tokenOutForContract = isOutETH ? CONTRACTS.WETH : getAddress(tokenOut);
       const decimalsIn = await getTokenDecimals(publicClient, tokenIn, isInETH);
@@ -732,7 +707,6 @@ export async function getSwap({
       };
     }
 
-    // Hitung amountOutMinimum dengan slippage
     const slippageMultiplier = (100 - slippage) / 100;
     const amountOutMin = (bestFeeResult.amountOut * BigInt(Math.floor(slippageMultiplier * 1000000))) / 1000000n;
 
@@ -740,18 +714,11 @@ export async function getSwap({
       ? BigInt(deadline)
       : BigInt(Math.floor(Date.now() / 1000) + 600);
 
-    // =============== PERBAIKAN UTAMA ===============
-    // Handle 3 kasus:
-    // 1. ERC20 -> ETH: swap + unwrap
-    // 2. ETH -> ERC20: wrap + swap + refund
-    // 3. ERC20 -> ERC20: swap biasa
-
     let callData;
     let value = isInETH ? bestFeeResult.amountInWei.toString() : '0';
     let additionalGas = 0n;
 
     if (isOutETH) {
-      // Kasus 1: ERC20 -> ETH (swap + unwrap)
       const swapCalldata = encodeFunctionData({
         abi: SWAP_ROUTER_ABI,
         functionName: 'exactInputSingle',
@@ -778,15 +745,13 @@ export async function getSwap({
         args: [[swapCalldata, unwrapCalldata]]
       });
 
-      additionalGas = 50000n; // Gas untuk unwrap
+      additionalGas = 50000n; 
     } else if (isInETH) {
-      // Kasus 2: ETH -> ERC20 (Router akan otomatis wrap ETH)
-      // Uniswap V3 Router mendukung ETH input langsung di exactInputSingle
       callData = encodeFunctionData({
         abi: SWAP_ROUTER_ABI,
         functionName: 'exactInputSingle',
         args: [{
-          tokenIn: CONTRACTS.WETH, // Router akan wrap ETH menjadi WETH
+          tokenIn: CONTRACTS.WETH, 
           tokenOut: bestFeeResult.tokenOutForContract,
           fee: bestFeeResult.fee,
           recipient: getAddress(recipient),
@@ -796,11 +761,8 @@ export async function getSwap({
         }]
       });
 
-      // Router akan otomatis handle ETH wrapping, jadi tidak perlu multicall
-      // Tetapi kita perlu mengirim ETH bersama transaksi (value sudah di-set di atas)
-      additionalGas = 30000n; // Gas untuk wrapping ETH
+      additionalGas = 30000n;
     } else {
-      // Kasus 3: ERC20 -> ERC20 (swap biasa)
       callData = encodeFunctionData({
         abi: SWAP_ROUTER_ABI,
         functionName: 'exactInputSingle',
@@ -816,7 +778,6 @@ export async function getSwap({
       });
     }
 
-    // Update gas estimate dengan additional gas
     const baseGas = BigInt(bestFeeResult.gasEstimate || 0);
     bestFeeResult.gasEstimate = (baseGas + additionalGas).toString();
 
@@ -849,14 +810,12 @@ export async function getSwap({
         usedFeeTier: bestFeeResult.fee,
         isInputETH: isInETH,
         isOutputETH: isOutETH,
-        // Info tambahan untuk debugging
         swapPath: isInETH && !isOutETH ? `ETH → WETH → ${tokenOut}` :
           !isInETH && isOutETH ? `${tokenIn} → WETH → ETH` :
             `${tokenIn} → ${tokenOut}`
       }
     };
 
-    // Jika diminta semua opsi, tambahkan ke response
     if (returnAllOptions && allFeeOptions) {
       return {
         ...response,
@@ -884,10 +843,6 @@ export async function getSwap({
   }
 }
 
-/* =========================================================
-   🔵 Fungsi khusus untuk swap ke ETH
-========================================================= */
-
 export async function getSwapToETH({
   publicClient,
   tokenIn,
@@ -898,7 +853,6 @@ export async function getSwapToETH({
   slippage = 2,
   deadline = Math.floor(Date.now() / 1000) + 600
 }) {
-  // Gunakan getSwap dengan tokenOut sebagai ETH
   return getSwap({
     publicClient,
     tokenIn,
@@ -912,10 +866,6 @@ export async function getSwapToETH({
   });
 }
 
-/* =========================================================
-   🔵 Fungsi khusus untuk swap dari ETH
-========================================================= */
-
 export async function getSwapFromETH({
   publicClient,
   tokenOut,
@@ -926,7 +876,6 @@ export async function getSwapFromETH({
   slippage = 2,
   deadline = Math.floor(Date.now() / 1000) + 600
 }) {
-  // Gunakan getSwap dengan tokenIn sebagai ETH
   return getSwap({
     publicClient,
     tokenIn: NATIVE_ETH.address,
@@ -939,10 +888,6 @@ export async function getSwapFromETH({
     deadline
   });
 }
-
-/* =========================================================
-   🔵 Fungsi dengan refundETH untuk ETH -> ERC20 (opsional)
-========================================================= */
 
 export async function getSwapFromETHWithRefund({
   publicClient,
@@ -958,7 +903,6 @@ export async function getSwapFromETHWithRefund({
     const isInETH = true;
     const isOutETH = false;
 
-    // Get quote terlebih dahulu
     const quoteData = await getSwapQuoteData({
       publicClient,
       tokenIn: NATIVE_ETH.address,
@@ -971,12 +915,10 @@ export async function getSwapFromETHWithRefund({
       deadline
     });
 
-    // Hitung amountOutMinimum dengan slippage
     const slippageMultiplier = (100 - slippage) / 100;
     const amountOut = BigInt(quoteData.buyAmount);
     const amountOutMin = (amountOut * BigInt(Math.floor(slippageMultiplier * 1000000))) / 1000000n;
 
-    // Buat calldata untuk ETH -> ERC20 dengan refund
     const swapCalldata = encodeFunctionData({
       abi: SWAP_ROUTER_ABI,
       functionName: 'exactInputSingle',
@@ -1031,10 +973,6 @@ export async function getSwapFromETHWithRefund({
   }
 }
 
-/* =========================================================
-   🔍 Utilitas tambahan
-========================================================= */
-
 export async function findAvailableRoute({
   publicClient,
   tokenIn,
@@ -1075,10 +1013,6 @@ export async function findAvailableRoute({
     );
   }
 }
-
-/* =========================================================
-   🔵 Fungsi untuk mendapatkan informasi token
-========================================================= */
 
 export async function getTokenInfo(publicClient, tokenAddress) {
   try {
@@ -1130,10 +1064,7 @@ export async function getTokenInfo(publicClient, tokenAddress) {
   }
 }
 
-/* =========================================================
-   🔵 Fungsi untuk mendapatkan swap type berdasarkan token
-========================================================= */
-
+// Function get swap type
 export function getSwapType(tokenIn, tokenOut) {
   const isInETH = isNativeETH(tokenIn);
   const isOutETH = isNativeETH(tokenOut);
