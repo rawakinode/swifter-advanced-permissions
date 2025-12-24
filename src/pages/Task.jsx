@@ -39,7 +39,6 @@ const statusColor = {
     canceled: "bg-gray-400",
 };
 
-// Items per page
 const ITEMS_PER_PAGE = 3;
 
 // Function to format timestamp
@@ -250,8 +249,6 @@ export default function Task() {
     const statuses = ["all", "active", "failed", "completed", "canceled"];
 
     const { getDelegationDataFromAPI, cancelDelegationTask } = useAuth();
-
-    // wagmi
     const { address, isConnected } = useAccount();
 
     // Fetch delegation data when wallet is connected
@@ -263,11 +260,9 @@ export default function Task() {
         try {
             const response = await getDelegationDataFromAPI();
             
-            // Handle response based on structure
             let tasks = [];
             
             if (Array.isArray(response)) {
-                // Filter tasks for current user
                 tasks = response.filter(task => 
                     task.owner_address?.toLowerCase() === address.toLowerCase()
                 );
@@ -320,33 +315,27 @@ export default function Task() {
             };
         });
 
-        // Sort by timestamp (newest first)
         return tasks.sort((a, b) => Number(b.originalData.timestamp) - Number(a.originalData.timestamp));
     }, [tasksData]);
 
-    // Filter tasks based on activeStatus 
     const filteredTasks = useMemo(() => {
         if (activeStatus === "all") return mappedTasks;
         return mappedTasks.filter(task => task.status === activeStatus);
     }, [mappedTasks, activeStatus]);
 
-    // Pagination logic
     const totalPages = Math.ceil(filteredTasks.length / ITEMS_PER_PAGE);
 
-    // Get tasks for current page
     const currentTasks = useMemo(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         const endIndex = startIndex + ITEMS_PER_PAGE;
         return filteredTasks.slice(startIndex, endIndex);
     }, [filteredTasks, currentPage]);
 
-    // Handler to open cancel confirmation dialog
     const handleOpenCancelDialog = (task) => {
         setSelectedTask(task);
         setCancelDialogOpen(true);
     };
 
-    // Handler to close cancel dialog
     const handleCloseCancelDialog = () => {
         if (!cancelling) {
             setCancelDialogOpen(false);
@@ -354,7 +343,6 @@ export default function Task() {
         }
     };
 
-    // Handler to confirm cancellation
     const handleConfirmCancel = async () => {
         if (!selectedTask || !address) return;
 
@@ -369,7 +357,6 @@ export default function Task() {
                     message: "The task has been successfully cancelled."
                 });
 
-                // Refresh task list
                 await fetchDelegationData();
             } else {
                 throw new Error(response.message || "Failed to cancel task");
@@ -388,12 +375,10 @@ export default function Task() {
         }
     };
 
-    // Handler to close result popup
     const handleCloseResultPopup = () => {
         setResultPopup(prev => ({ ...prev, open: false }));
     };
 
-    // Generate pagination links with ellipsis
     const generatePaginationLinks = () => {
         const pages = [];
         const maxVisiblePages = 3;
@@ -488,7 +473,6 @@ export default function Task() {
                     )}
                 </div>
 
-                {/* Status Selection */}
                 {isConnected && (
                     <div className="mb-6">
                         <div className="space-y-2">
@@ -509,7 +493,6 @@ export default function Task() {
                     </div>
                 )}
 
-                {/* Loading State */}
                 {isConnected && loading && (
                     <div className="flex flex-col space-y-3">
                         <Skeleton className="h-[100px] w-full rounded-xl" />
@@ -521,7 +504,6 @@ export default function Task() {
                     </div>
                 )}
 
-                {/* Error State */}
                 {isConnected && error && !loading && (
                     <div className="flex flex-col items-center justify-center p-6 border rounded-2xl bg-red-500/10 text-center mb-4">
                         <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
@@ -537,7 +519,6 @@ export default function Task() {
                     </div>
                 )}
 
-                {/* Task List */}
                 {isConnected && !loading && (
                     <div className="space-y-2 mb-6">
                         {currentTasks.length > 0 ? (
@@ -648,7 +629,6 @@ export default function Task() {
                     </div>
                 )}
 
-                {/* Pagination Component - hanya tampil jika ada lebih dari 1 page */}
                 {isConnected && !loading && totalPages > 1 && (
                     <Pagination>
                         <PaginationContent>
@@ -673,7 +653,6 @@ export default function Task() {
                     </Pagination>
                 )}
 
-                {/* Info pagination */}
                 {isConnected && !loading && filteredTasks.length > 0 && (
                     <div className="text-center text-xs text-muted-foreground mt-2">
                         Page {currentPage} of {totalPages} • {filteredTasks.length} tasks total
@@ -690,7 +669,6 @@ export default function Task() {
                 )}
             </motion.div>
 
-            {/* Confirmation Dialog */}
             <ConfirmationDialog
                 isOpen={cancelDialogOpen}
                 onClose={handleCloseCancelDialog}
@@ -699,7 +677,6 @@ export default function Task() {
                 loading={cancelling}
             />
 
-            {/* Result Popup */}
             <ResultPopup
                 isOpen={resultPopup.open}
                 onClose={handleCloseResultPopup}

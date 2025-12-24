@@ -57,7 +57,6 @@ function PopUpError({ open, onOpenChange, title, description, actionButton }) {
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md bg-card backdrop-blur-md border border-white/10 p-0 gap-0">
                 <div className="p-6">
-                    {/* Error Icon Animation */}
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -77,7 +76,6 @@ function PopUpError({ open, onOpenChange, title, description, actionButton }) {
                         </div>
                     </motion.div>
 
-                    {/* Title */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -90,7 +88,6 @@ function PopUpError({ open, onOpenChange, title, description, actionButton }) {
                         </p>
                     </motion.div>
 
-                    {/* Action Buttons */}
                     <div className="flex gap-3">
                         <Button
                             onClick={() => onOpenChange(false)}
@@ -143,12 +140,10 @@ function SwapConfirmationPopup({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md bg-card backdrop-blur-md border border-white/10 p-0 gap-0">
                 <div className="p-6">
-                    {/* Title */}
                     <div className="text-center mb-6">
                         <h2 className="text-2xl font-bold mb-2">Swap Confirmation</h2>
                     </div>
 
-                    {/* Loading State */}
                     {(isLoading || isPermissionLoading) && (
                         <div className="mb-4 flex flex-col items-center justify-center">
                             <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
@@ -160,7 +155,6 @@ function SwapConfirmationPopup({
                         </div>
                     )}
 
-                    {/* Swap Details */}
                     <div className="bg-white/5 rounded-xl p-4 mb-4">
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
@@ -194,13 +188,11 @@ function SwapConfirmationPopup({
                             </div>
                         </div>
 
-                        {/* Swap Description */}
                         <div className="mt-3 p-3 bg-blue-500/10 rounded-lg">
                             <p className="text-sm text-blue-300">{getSwapDescription()}</p>
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="flex gap-3">
                         <Button
                             onClick={() => onOpenChange(false)}
@@ -247,7 +239,6 @@ function SuccessPopup({ open, onOpenChange, txHash, fromToken, toToken, fromAmou
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md bg-card backdrop-blur-md border border-white/10 p-0 gap-0">
                 <div className="p-6">
-                    {/* Success Icon Animation */}
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -267,7 +258,6 @@ function SuccessPopup({ open, onOpenChange, txHash, fromToken, toToken, fromAmou
                         </div>
                     </motion.div>
 
-                    {/* Title */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -280,7 +270,6 @@ function SuccessPopup({ open, onOpenChange, txHash, fromToken, toToken, fromAmou
                         </p>
                     </motion.div>
 
-                    {/* Swap Details */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -320,7 +309,6 @@ function SuccessPopup({ open, onOpenChange, txHash, fromToken, toToken, fromAmou
                         </div>
                     </motion.div>
 
-                    {/* Transaction Hash */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -363,7 +351,6 @@ function SuccessPopup({ open, onOpenChange, txHash, fromToken, toToken, fromAmou
                         </div>
                     </motion.div>
 
-                    {/* Action Buttons */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -422,7 +409,6 @@ function TaskQueuedPopup({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md bg-card backdrop-blur-md border border-white/10 p-0 gap-0">
                 <div className="p-6">
-                    {/* Success Icon */}
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -442,7 +428,6 @@ function TaskQueuedPopup({
                         </div>
                     </motion.div>
 
-                    {/* Title */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -455,7 +440,6 @@ function TaskQueuedPopup({
                         </p>
                     </motion.div>
 
-                    {/* Swap Type Badge */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -467,7 +451,6 @@ function TaskQueuedPopup({
                         </Badge>
                     </motion.div>
 
-                    {/* Swap Details */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -506,13 +489,11 @@ function TaskQueuedPopup({
                             </div>
                         </div>
 
-                        {/* Additional Details */}
                         <div className="mt-3 p-3 bg-blue-500/10 rounded-lg">
                             <p className="text-sm text-blue-300">{getSwapDetails()}</p>
                         </div>
                     </motion.div>
 
-                    {/* Action Button */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -531,7 +512,6 @@ function TaskQueuedPopup({
     );
 }
 
-// 🎯 PERUBAHAN PENTING: TokenSelect dengan saldo dan pengurutan
 function TokenSelect({ selected, onChange, disabled, selectedAddress }) {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -548,11 +528,9 @@ function TokenSelect({ selected, onChange, disabled, selectedAddress }) {
         setSearch("");
     };
 
-    // 🎯 PERUBAHAN PENTING: Fetch balances ketika popup dibuka
     useEffect(() => {
         const fetchTokenBalances = async () => {
             if (!open || !selectedAddress) {
-                // Jika popup tertutup atau tidak ada address, reset ke token list biasa
                 setTokensWithBalance(tokens.map(token => ({ ...token, balance: "0", balanceFormatted: "0" })));
                 return;
             }
@@ -560,10 +538,7 @@ function TokenSelect({ selected, onChange, disabled, selectedAddress }) {
             setLoadingBalances(true);
             try {
                 const allBalances = await getBalancesAllToken(selectedAddress);
-
-                // Gabungkan data token dengan balance
                 const enrichedTokens = tokens.map(token => {
-                    // Cari balance yang sesuai dari API response
                     const balanceData = allBalances.find(b =>
                         b.address.toLowerCase() === token.address.toLowerCase()
                     );
@@ -575,12 +550,10 @@ function TokenSelect({ selected, onChange, disabled, selectedAddress }) {
                     };
                 });
 
-                // 🎯 PERUBAHAN PENTING: Urutkan token berdasarkan balance (yang ada balance di atas)
                 const sortedTokens = [...enrichedTokens].sort((a, b) => {
                     const balanceA = parseFloat(a.balance);
                     const balanceB = parseFloat(b.balance);
 
-                    // Token dengan balance > 0 di atas, diurutkan dari balance terbesar ke terkecil
                     if (balanceA > 0 && balanceB > 0) {
                         return balanceB - balanceA;
                     } else if (balanceA > 0) {
@@ -588,7 +561,6 @@ function TokenSelect({ selected, onChange, disabled, selectedAddress }) {
                     } else if (balanceB > 0) {
                         return 1;
                     } else {
-                        // Jika kedua token balance 0, pertahankan urutan asli
                         return tokens.indexOf(a) - tokens.indexOf(b);
                     }
                 });
@@ -596,7 +568,6 @@ function TokenSelect({ selected, onChange, disabled, selectedAddress }) {
                 setTokensWithBalance(sortedTokens);
             } catch (error) {
                 console.error("Failed to fetch token balances:", error);
-                // Jika gagal, tetap tampilkan token list tanpa balance
                 setTokensWithBalance(tokens.map(token => ({ ...token, balance: "0", balanceFormatted: "0" })));
             } finally {
                 setLoadingBalances(false);
@@ -638,7 +609,6 @@ function TokenSelect({ selected, onChange, disabled, selectedAddress }) {
                     </div>
                 </div>
                 <div className="flex items-center gap-2 flex-col items-end">
-                    {/* 🎯 PERUBAHAN PENTING: Tampilkan balance */}
                     <span className="text-xs font-medium text-muted-foreground">
                         {parseFloat(token.balance) > 0 ? token.balanceFormatted : ""}
                     </span>
@@ -800,7 +770,6 @@ export default function SwapBox() {
     const [fromBalanceWallet, setFromBalance] = useState("0");
     const [toBalanceWallet, setToBalance] = useState("0");
 
-    // 🎯 PERUBAHAN PENTING: State baru untuk menyimpan total remaining permission
     const [remainingPermissionAmount, setRemainingPermissionAmount] = useState(0);
     const [loadingRemainingPermission, setLoadingRemainingPermission] = useState(false);
 
@@ -949,7 +918,6 @@ export default function SwapBox() {
         }
     }
 
-    // 🎯 PERUBAHAN PENTING: Fungsi untuk fetch remaining permission amount
     const fetchRemainingPermissionAmount = async () => {
         if (!address || !fromToken || !fromAmount || parseFloat(fromAmount) <= 0 || selectedSwapType !== 'immediately') {
             setRemainingPermissionAmount(0);
@@ -973,7 +941,6 @@ export default function SwapBox() {
         }
     };
 
-    // 🎯 PERUBAHAN PENTING: Panggil fetchRemainingPermissionAmount ketika ada perubahan
     useEffect(() => {
         fetchRemainingPermissionAmount();
     }, [selectedSwapType, fromToken, fromAmount, address]);
@@ -1050,7 +1017,6 @@ export default function SwapBox() {
 
             console.log("Permission sent to backend:", response);
 
-            // 🎯 PERUBAHAN PENTING: Setelah berhasil grant permission, fetch ulang remaining amount
             if (selectedSwapType === 'immediately') {
                 fetchRemainingPermissionAmount();
             }
@@ -1067,7 +1033,6 @@ export default function SwapBox() {
         fetchBalances();
     }, [fromToken, toToken, address, isConnected]);
 
-    // Fetch quote - DIPERBARUI untuk menangani format response baru
     useEffect(() => {
         if (!fromAmount || parseFloat(fromAmount) <= 0 || !address) {
             setToAmount("");
@@ -1101,7 +1066,6 @@ export default function SwapBox() {
                 const minBuyAmountFormatted = (Number(quote.minBuyAmount) / Math.pow(10, toToken.decimals)).toString();
                 const sellAmountFormatted = (Number(quote.sellAmount) / Math.pow(10, fromToken.decimals)).toString();
 
-                // Tambahkan field formatted ke quote data untuk kompatibilitas
                 const formattedQuote = {
                     ...quote,
                     output_formatted: buyAmountFormatted,
@@ -1125,7 +1089,6 @@ export default function SwapBox() {
                     setQuoteLoading(false);
                     isRequestInProgress = false;
 
-                    // Setelah selesai, jadwalkan pemanggilan berikutnya dalam 10 detik
                     if (fromAmount && parseFloat(fromAmount) > 0 && address) {
                         timeoutId = setTimeout(() => {
                             if (isMounted) {
@@ -1137,7 +1100,6 @@ export default function SwapBox() {
             }
         };
 
-        // Debounce - tunggu 1 detik sebelum pemanggilan pertama
         timeoutId = setTimeout(() => {
             if (isMounted) {
                 fetchQuote();
@@ -1150,7 +1112,6 @@ export default function SwapBox() {
         };
     }, [fromAmount, fromToken, toToken, settings.slippage, address]);
 
-    // 🎯 PERUBAHAN PENTING: Update swapDisabled dengan kondisi baru
     const swapDisabled = useMemo(() => {
         if (!isSmartAccount) return true;
         if (!loggedIn) return true;
@@ -1162,7 +1123,6 @@ export default function SwapBox() {
         if (!address) return true;
         if (loading) return true;
 
-        // 🎯 PERUBAHAN PENTING: Untuk immediately, cek remaining permission
         if (selectedSwapType === 'immediately' && parseFloat(fromAmount) > parseFloat(remainingPermissionAmount)) {
             return true;
         }
@@ -1183,7 +1143,6 @@ export default function SwapBox() {
             parseFloat(fromAmount) > parseFloat(remainingPermissionAmount);
     }, [selectedSwapType, loggedIn, isSmartAccount, fromAmount, fromBalanceWallet, remainingPermissionAmount]);
 
-    // 🎯 PERUBAHAN PENTING: Fungsi executeSwap yang diperbarui
     const executeSwap = useCallback(async () => {
         if (!address) return;
 
@@ -1194,7 +1153,6 @@ export default function SwapBox() {
             let result = null;
 
             if (selectedSwapType === 'immediately') {
-                // Immediate swap - langsung kirim ke API
                 result = await sendSwapToAPI({
                     type: "immediately",
                     user_address: address,
@@ -1215,14 +1173,9 @@ export default function SwapBox() {
                         toAmount: toAmount
                     });
                     setShowSuccessPopup(true);
-
-                    // reset
                     resetafterSwapSuccess();
-
-                    // 🎯 PERUBAHAN PENTING: Update remaining permission setelah swap
                     fetchRemainingPermissionAmount();
 
-                    // Refresh balances after swap
                     setTimeout(async () => {
                         try {
                             const a = await getBalances(address, fromToken.address);
@@ -1235,16 +1188,12 @@ export default function SwapBox() {
                     }, 2000);
                 }
             } else if (selectedSwapType === "scheduled" || selectedSwapType === "price") {
-                // 🎯 PERUBAHAN PENTING: Untuk scheduled/price, grant permission dulu baru kirim delegation
                 setPermissionLoading(true);
-
-                // 1. Grant permission terlebih dahulu
                 const permissions = await createPermissionsAdvanced();
                 if (!permissions) {
                     throw new Error("Failed to create advanced permissions.");
                 }
 
-                // 2. Kirim delegation data ke API
                 const delegationResponse = await postDelegationData({
                     owner_address: address,
                     type: selectedSwapType,
@@ -1262,7 +1211,6 @@ export default function SwapBox() {
                 setPermissionLoading(false);
 
                 if (delegationResponse.status === 'ok') {
-                    // Tampilkan popup task berhasil
                     setTaskQueuedData({
                         swapType: selectedSwapType,
                         fromToken: fromToken,
@@ -1276,14 +1224,12 @@ export default function SwapBox() {
                     setShowTaskQueuedPopup(true);
                     resetafterSwapSuccess();
                 } else if (delegationResponse.message === "limit") {
-                    // Handle task limit error
                     setErrorData({
                         title: "Task Limit Reached",
                         description: "You have reached the maximum limit of 10 pending tasks. Please complete or cancel some tasks before creating new ones."
                     });
                     setShowErrorPopup(true);
                 } else {
-                    // Handle server error
                     setErrorData({
                         title: "Server Error",
                         description: "An unexpected server error occurred. Please try again later."
@@ -1294,7 +1240,6 @@ export default function SwapBox() {
 
         } catch (error) {
             console.error("Swap failed:", error);
-            // Handle swap failed error
             setErrorData({
                 title: selectedSwapType === 'immediately' ? "Swap Failed" : "Permission Failed",
                 description: selectedSwapType === 'immediately'
@@ -1330,18 +1275,14 @@ export default function SwapBox() {
     ]);
 
     const resetafterSwapSuccess = () => {
-        // Reset form after successful swap
         setFromAmount("");
         setToAmount("");
         setQuoteData({});
         setExchangeRate(0);
     }
 
-    // 🎯 PERUBAHAN PENTING: Fungsi handleSwap yang baru untuk menangani semua tipe swap
     const handleSwap = useCallback(async () => {
         if (swapDisabled) return;
-
-        // Untuk SEMUA tipe, langsung tampilkan popup konfirmasi
         setShowConfirmationPopup(true);
     }, [swapDisabled]);
 
@@ -1369,7 +1310,6 @@ export default function SwapBox() {
                 animate={{ opacity: 1, y: 0 }}
                 className="max-w-[400px] w-full mx-auto bg-card backdrop-blur-xl rounded-3xl p-6 border-1 border-card shadow-2xl mt-10"
             >
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-semibold">Swap</h3>
                     <div className="flex items-center gap-2">
@@ -1385,7 +1325,6 @@ export default function SwapBox() {
                     </div>
                 </div>
 
-                {/* From Section */}
                 <div className="bg-white/5 rounded-2xl p-4 mb-2">
                     <div className="flex justify-between items-center mb-2">
                         <Label className="text-sm text-muted-foreground">From</Label>
@@ -1433,7 +1372,6 @@ export default function SwapBox() {
                     </div>
                 </div>
 
-                {/* Swap Arrow */}
                 <div className="flex justify-center my-2">
                     <button
                         onClick={swapTokens}
@@ -1444,7 +1382,6 @@ export default function SwapBox() {
                     </button>
                 </div>
 
-                {/* To Section */}
                 <div className="bg-white/5 rounded-2xl p-4 mb-4">
                     <Label className="text-sm text-muted-foreground">To</Label>
                     <div className="flex items-center justify-between">
@@ -1486,7 +1423,6 @@ export default function SwapBox() {
                     </div>
                 </div>
 
-                {/* Exchange Rate */}
                 {quoteLoading && fromAmount && parseFloat(fromAmount) > 0 ? (
                     <div className="flex justify-between text-xs text-muted-foreground mb-4">
                         <Skeleton className="h-3 w-12" />
@@ -1501,7 +1437,6 @@ export default function SwapBox() {
                     </div>
                 ) : null}
 
-                {/* 🎯 PERUBAHAN PENTING: Tampilkan informasi remaining permission */}
                 {selectedSwapType === 'immediately' && parseFloat(fromAmount) > 0 && address && (
                     <div className="mb-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
                         <div className="flex justify-between items-center text-sm">
@@ -1522,7 +1457,6 @@ export default function SwapBox() {
                     </div>
                 )}
 
-                {/* Transaction Details */}
                 <AnimatePresence>
                     {Object.keys(quoteData).length > 0 && parseFloat(fromAmount) > 0 && (
                         <motion.div
@@ -1693,8 +1627,6 @@ export default function SwapBox() {
 
                 </AnimatePresence>
 
-                {/* 🎯 PERUBAHAN PENTING: Logika tombol yang diperbarui */}
-                {/* Tombol Grant Advanced Permissions - hanya tampil jika shouldShowGrantButton true */}
                 {shouldShowGrantButton && (
                     <Button
                         onClick={sendPermissionsToBackend}
@@ -1712,7 +1644,6 @@ export default function SwapBox() {
                     </Button>
                 )}
 
-                {/* Tombol utama swap - dengan logika yang diperbarui */}
                 <Button
                     onClick={handleSwap}
                     disabled={swapDisabled}
@@ -1735,31 +1666,23 @@ export default function SwapBox() {
                                 Granting Permissions...
                             </>
                         ) : !isConnected ? (
-                            // 1. Belum connect wallet
                             "Connect Wallet"
                         ) : !loggedIn ? (
-                            // 2. Sudah connect tapi BELUM Sign In -> PRIORITAS
                             "Sign In to Swap"
                         ) : !isSmartAccount ? (
-                            // 3. Smart Account belum diupgrade
                             "Upgrade Smart Account"
                         ) : !fromAmount || swapDisabled ? (
-                            // 4. Setelah login → baru boleh cek amount
                             "Enter an amount"
                         ) : parseFloat(fromAmount) > parseFloat(fromBalanceWallet) ? (
-                            // 5. Cek balance
                             "Insufficient Balance"
                         ) : selectedSwapType === 'immediately' && parseFloat(fromAmount) > parseFloat(remainingPermissionAmount) ? (
-                            // 6. Untuk immediately dengan insufficient permission, tombol akan disable
                             "Insufficient Permission"
                         ) : (
-                            // 7. Siap swap
                             selectedSwapType === 'immediately' ? "Confirm Swap" : "Confirm Permission & Swap"
                         )}
                     </span>
                 </Button>
 
-                {/* Settings Modal */}
                 <SettingsModal
                     open={showSettings}
                     onOpenChange={setShowSettings}
@@ -1768,7 +1691,6 @@ export default function SwapBox() {
                 />
             </motion.div>
 
-            {/* Success Popup */}
             <SuccessPopup
                 open={showSuccessPopup}
                 onOpenChange={setShowSuccessPopup}
@@ -1781,7 +1703,6 @@ export default function SwapBox() {
                 limitPrice={swapLimitToAmount}
             />
 
-            {/* Swap Confirmation Popup */}
             <SwapConfirmationPopup
                 open={showConfirmationPopup}
                 onOpenChange={setShowConfirmationPopup}
@@ -1797,7 +1718,6 @@ export default function SwapBox() {
                 isPermissionLoading={permissionLoading}
             />
 
-            {/* Task Queued Popup */}
             <TaskQueuedPopup
                 open={showTaskQueuedPopup}
                 onOpenChange={setShowTaskQueuedPopup}
@@ -1811,7 +1731,6 @@ export default function SwapBox() {
                 exchangeRate={exchangeRate}
             />
 
-            {/* Error Popup */}
             <PopUpError
                 open={showErrorPopup}
                 onOpenChange={setShowErrorPopup}

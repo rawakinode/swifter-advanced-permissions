@@ -26,14 +26,14 @@ export function AuthProvider({ children }) {
   const { token, expiresAt } = tokenData;
   const previousAddressRef = useRef(null);
 
-  // 🔁 auto-update token di ref
+  // auto-update token di ref
   const tokenRef = useRef(token);
   useEffect(() => {
     tokenRef.current = token;
     isLogged();
   }, [token]);
 
-  // 🧹 Auto-remove token kalau expired
+  // Auto-remove token kalau expired
   useEffect(() => {
     if (!token) return;
     const now = Date.now();
@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
     return () => clearTimeout(timeout);
   }, [token, expiresAt]);
 
-  // 🧾 Fungsi API dasar
+  // Fungsi API dasar
   const getNonce = async (address) => {
     const res = await axios.post(`${API_BASE}/api/auth/nonce`, { address });
     return res.data;
@@ -68,7 +68,7 @@ export function AuthProvider({ children }) {
     console.log("🧹 Logged out");
   };
 
-  // 🔐 Ambil user data
+  // Ambil user data
   const getUserData = async (overrideToken) => {
     const authToken = overrideToken || token;
     if (!authToken) throw new Error("User not authenticated");
@@ -124,7 +124,7 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  // 📤 Post delegation data ke API
+  // Post delegation data ke API
   const postDelegationData = async (delegationData) => {
     if (!token) throw new Error("User not authenticated");
     const res = await axios.post(`${API_BASE}/api/send_delegation`, delegationData, {
@@ -133,7 +133,7 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  // 📥 Ambil delegation data dari API
+  // Ambil delegation data dari API
   const getDelegationDataFromAPI = async () => {
     if (!token) throw new Error("User not authenticated");
     const res = await axios.post(`${API_BASE}/api/delegations`, {}, {
@@ -142,7 +142,7 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  // ❌ Batalkan delegation task
+  // Batalkan delegation task
   const cancelDelegationTask = async (_id) => {
     if (!token) throw new Error("User not authenticated");
     const res = await axios.post(`${API_BASE}/api/cancel_delegation`, { _id }, {
@@ -151,7 +151,7 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  // 📤 Post subscribe delegation data ke API - DIPERBAIKI: handle error response dengan baik
+  // Post subscribe delegation data ke API - DIPERBAIKI: handle error response dengan baik
   const postSubscribeDelegationData = async (delegationData) => {
     if (!token) throw new Error("User not authenticated");
     try {
@@ -168,7 +168,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // 📋 Ambil subscription data dari API
+  // Ambil subscription data dari API
   const getSubscriptionDataFromAPI = async () => {
     if (!token) throw new Error("User not authenticated");
     const res = await axios.post(`${API_BASE}/api/subscriptions`, {}, {
@@ -177,7 +177,7 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  // ❌ Batalkan subscription
+  // Batalkan subscription
   const cancelSubscription = async (_id) => {
     if (!token) throw new Error("User not authenticated");
     const res = await axios.post(`${API_BASE}/api/cancel_subscription`, { _id }, {
@@ -186,7 +186,7 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  // 🩺 Health check
+  // Health check
   const getHealth = async () => {
     const res = await axios.get(`${API_BASE}/api/health`);
     return res.data;
@@ -209,7 +209,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // 🤝 Otentikasi otomatis jika wallet connect
+  // Otentikasi otomatis jika wallet connect
   useEffect(() => {
     const authenticate = async () => {
       try {
@@ -232,12 +232,12 @@ export function AuthProvider({ children }) {
     }
   }, [isConnected, address, token]);
 
-  // 🚪 Logout otomatis saat wallet disconnect
+  // Logout otomatis saat wallet disconnect
   useEffect(() => {
     if (!isConnected) logout();
   }, [isConnected]);
 
-  // 🔏 Fungsi untuk autentikasi user (nonce + sign)
+  // Fungsi untuk autentikasi user (nonce + sign)
   const authenticateUser = async () => {
     if (!address) return;
     try {

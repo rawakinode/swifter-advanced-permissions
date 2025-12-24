@@ -1,4 +1,3 @@
-// src/components/features/MySubscription.jsx
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +26,6 @@ import { MoreVertical, AlertCircle, Unplug, Loader2, X, CheckCircle, XCircle, Ca
 import { useAccount } from "wagmi";
 import { useAuth } from "@/context/AuthContext";
 
-// ✅ IMPORT ACCORDION COMPONENTS
 import {
     Accordion,
     AccordionContent,
@@ -65,28 +63,23 @@ const durationLabels = {
     "indefinite": "Indefinite"
 };
 
-// Items per page
 const ITEMS_PER_PAGE = 3;
 
-// Fungsi untuk memformat timestamp
 const formatTimestamp = (timestamp) => {
     if (!timestamp) return "N/A";
     
-    // Handle MongoDB ObjectId timestamp or regular timestamp
     let timestampValue;
     if (typeof timestamp === 'object' && timestamp.$date) {
         timestampValue = new Date(timestamp.$date);
     } else if (typeof timestamp === 'object' && timestamp.$numberLong) {
         timestampValue = new Date(parseInt(timestamp.$numberLong));
     } else {
-        // Convert seconds to milliseconds if needed
         timestampValue = new Date(timestamp * 1000 || timestamp);
     }
     
     return timestampValue.toLocaleString();
 };
 
-// Fungsi untuk menghitung waktu sampai next execution
 const calculateTimeUntilNextExecution = (nextExecutionTimestamp) => {
     if (!nextExecutionTimestamp) return "N/A";
 
@@ -114,7 +107,6 @@ const calculateTimeUntilNextExecution = (nextExecutionTimestamp) => {
     return `${minutes}m`;
 };
 
-// Confirmation Dialog Component
 const ConfirmationDialog = ({ isOpen, onClose, onConfirm, subscription, loading }) => {
     if (!isOpen) return null;
 
@@ -145,7 +137,6 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, subscription, loading 
                         Are you sure you want to cancel this subscription? This action cannot be undone.
                     </p>
 
-                    {/* Subscription Data Display */}
                     {subscription && (
                         <Card className="p-3 bg-muted/20">
                             <div className="space-y-2 text-xs">
@@ -247,7 +238,6 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
     const executionHistory = subscription.originalData?.execution_history || [];
     const historyCount = executionHistory.length;
 
-    // Format status badge color
     const getStatusColor = (status) => {
         switch (status?.toLowerCase()) {
             case 'success': return 'bg-green-100 text-green-800';
@@ -285,7 +275,6 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Left Column: Subscription Details */}
                     <div className="space-y-6">
                         <Card className="p-5">
                             <h4 className="font-semibold text-md mb-4 flex items-center gap-2">
@@ -341,7 +330,6 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
                             </div>
                         </Card>
 
-                        {/* Token Information */}
                         <Card className="p-5">
                             <h4 className="font-semibold text-md mb-4">Token Details</h4>
                             <div className="space-y-2 text-xs">
@@ -380,7 +368,6 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
                         </Card>
                     </div>
 
-                    {/* Right Column: Execution History */}
                     <div className="space-y-6">
                         <Card className="p-5">
                             <div className="flex justify-between items-center mb-4">
@@ -477,7 +464,6 @@ const SubscriptionDetailPopup = ({ isOpen, onClose, subscription }) => {
                             )}
                         </Card>
 
-                        {/* Summary Card */}
                         <Card className="p-5">
                             <h4 className="font-semibold text-md mb-4">Summary</h4>
                             <div className="space-y-2 text-xs">
@@ -529,7 +515,6 @@ export default function MySubscription() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // State untuk cancellation functionality
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [selectedSubscription, setSelectedSubscription] = useState(null);
     const [cancelling, setCancelling] = useState(false);
@@ -539,18 +524,14 @@ export default function MySubscription() {
         message: ""
     });
 
-    // State untuk detail popup
     const [detailPopupOpen, setDetailPopupOpen] = useState(false);
     const [selectedSubscriptionDetail, setSelectedSubscriptionDetail] = useState(null);
 
     const statuses = ["all", "active", "canceled", "completed", "expired"];
 
     const { getSubscriptionDataFromAPI, cancelSubscription } = useAuth();
-
-    // wagmi
     const { address, isConnected } = useAccount();
 
-    // Fetch subscription data when wallet is connected
     const fetchSubscriptionData = useCallback(async () => {
         if (!isConnected || !address) return;
 
@@ -559,11 +540,9 @@ export default function MySubscription() {
         try {
             const response = await getSubscriptionDataFromAPI();
             
-            // Handle response based on structure (similar to Task.js)
             let subscriptions = [];
             
             if (Array.isArray(response)) {
-                // Filter subscriptions for current user based on wallet_address
                 subscriptions = response.filter(sub => 
                     sub.wallet_address?.toLowerCase() === address.toLowerCase()
                 );
@@ -576,7 +555,6 @@ export default function MySubscription() {
                     sub.wallet_address?.toLowerCase() === address.toLowerCase()
                 );
             } else if (response && response.status === 'ok' && typeof response.data === 'object') {
-                // If it's a single object, convert to array
                 if (response.data.wallet_address?.toLowerCase() === address.toLowerCase()) {
                     subscriptions = [response.data];
                 }
@@ -598,10 +576,8 @@ export default function MySubscription() {
         }
     }, [isConnected, address, fetchSubscriptionData]);
 
-    // Map data from API to required format
     const mappedSubscriptions = useMemo(() => {
         const subscriptions = subscriptionsData.map(sub => {
-            // Extract values
             const frequency = sub.frequency || "weekly";
             const duration = sub.duration || "1month";
             const amount = sub.amount || "0";
@@ -609,15 +585,9 @@ export default function MySubscription() {
             const executed = sub.executed || 0;
             const nextExecutionTimestamp = sub.nextExecutionTimestamp;
             const nextExecution = sub.nextExecution || formatTimestamp(nextExecutionTimestamp);
-            
-            // Format amount
             const amountFormatted = parseFloat(amount).toFixed(6);
-            
-            // Generate frequency and duration labels
             const frequencyLabel = frequencyLabels[frequency] || frequency;
             const durationLabel = durationLabels[duration] || duration;
-            
-            // Calculate next execution time
             const nextExecutionTime = calculateTimeUntilNextExecution(nextExecutionTimestamp);
 
             return {
@@ -641,7 +611,6 @@ export default function MySubscription() {
             };
         });
 
-        // Sort by created_at (newest first)
         return subscriptions.sort((a, b) => {
             const timeA = a.originalData.created_at;
             const timeB = b.originalData.created_at;
@@ -649,29 +618,24 @@ export default function MySubscription() {
         });
     }, [subscriptionsData]);
 
-    // Filter subscriptions based on activeStatus
     const filteredSubscriptions = useMemo(() => {
         if (activeStatus === "all") return mappedSubscriptions;
         return mappedSubscriptions.filter(sub => sub.status === activeStatus);
     }, [mappedSubscriptions, activeStatus]);
 
-    // Pagination logic
     const totalPages = Math.ceil(filteredSubscriptions.length / ITEMS_PER_PAGE);
 
-    // Get subscriptions for current page
     const currentSubscriptions = useMemo(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         const endIndex = startIndex + ITEMS_PER_PAGE;
         return filteredSubscriptions.slice(startIndex, endIndex);
     }, [filteredSubscriptions, currentPage]);
 
-    // Handler to open cancel confirmation dialog
     const handleOpenCancelDialog = (subscription) => {
         setSelectedSubscription(subscription);
         setCancelDialogOpen(true);
     };
 
-    // Handler to close cancel dialog
     const handleCloseCancelDialog = () => {
         if (!cancelling) {
             setCancelDialogOpen(false);
@@ -679,7 +643,6 @@ export default function MySubscription() {
         }
     };
 
-    // Handler to confirm cancellation
     const handleConfirmCancel = async () => {
         if (!selectedSubscription || !address) return;
 
@@ -694,7 +657,6 @@ export default function MySubscription() {
                     message: "The subscription has been successfully cancelled."
                 });
 
-                // Refresh subscription list
                 await fetchSubscriptionData();
             } else {
                 throw new Error(response.message || "Failed to cancel subscription");
@@ -713,24 +675,20 @@ export default function MySubscription() {
         }
     };
 
-    // Handler to close result popup
     const handleCloseResultPopup = () => {
         setResultPopup(prev => ({ ...prev, open: false }));
     };
 
-    // Handler to open detail popup
     const handleOpenDetailPopup = (subscription) => {
         setSelectedSubscriptionDetail(subscription);
         setDetailPopupOpen(true);
     };
 
-    // Handler to close detail popup
     const handleCloseDetailPopup = () => {
         setDetailPopupOpen(false);
         setSelectedSubscriptionDetail(null);
     };
 
-    // Generate pagination links with ellipsis
     const generatePaginationLinks = () => {
         const pages = [];
         const maxVisiblePages = 3;
@@ -825,7 +783,6 @@ export default function MySubscription() {
                     )}
                 </div>
 
-                {/* Status Selection */}
                 {isConnected && (
                     <div className="mb-6">
                         <div className="space-y-2">
@@ -846,7 +803,6 @@ export default function MySubscription() {
                     </div>
                 )}
 
-                {/* Loading State */}
                 {isConnected && loading && (
                     <div className="flex flex-col space-y-3">
                         <Skeleton className="h-[120px] w-full rounded-xl" />
@@ -858,7 +814,6 @@ export default function MySubscription() {
                     </div>
                 )}
 
-                {/* Error State */}
                 {isConnected && error && !loading && (
                     <div className="flex flex-col items-center justify-center p-6 border rounded-2xl bg-red-500/10 text-center mb-4">
                         <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
@@ -874,7 +829,6 @@ export default function MySubscription() {
                     </div>
                 )}
 
-                {/* Subscription List */}
                 {isConnected && !loading && (
                     <div className="space-y-3 mb-6">
                         {currentSubscriptions.length > 0 ? (
@@ -927,7 +881,6 @@ export default function MySubscription() {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="p-0 space-y-3">
-                                        {/* Main Swap Info */}
                                         <div className="flex justify-between items-center mb-0">
                                             <div className="text-lg font-bold">
                                                 {subscription.from} → {subscription.to}
@@ -937,8 +890,6 @@ export default function MySubscription() {
                                                 <div className="text-xs text-muted-foreground">per swap</div>
                                             </div>
                                         </div>
-
-                                        {/* ✅ ACCORDION UNTUK DETAILS */}
                                         <Accordion type="single" collapsible className="w-full">
                                             <AccordionItem value="details" className="border-none">
                                                 <AccordionTrigger className="text-xs py-2 hover:no-underline">
@@ -953,7 +904,6 @@ export default function MySubscription() {
                                                 </AccordionTrigger>
                                                 <AccordionContent className="pb-0">
                                                     <div className="space-y-3">
-                                                        {/* Frequency */}
                                                         <div className="flex justify-between items-center mb-0">
                                                             <div className="flex items-center gap-2 text-muted-foreground">
                                                                 <Repeat className="h-3 w-3" />
@@ -962,7 +912,6 @@ export default function MySubscription() {
                                                             <span className="text-xs font-semibold">{subscription.frequencyLabel}</span>
                                                         </div>
 
-                                                        {/* Duration */}
                                                         <div className="flex justify-between items-center mb-0">
                                                             <div className="flex items-center gap-2 text-muted-foreground">
                                                                 <Calendar className="h-3 w-3" />
@@ -971,7 +920,6 @@ export default function MySubscription() {
                                                             <span className="text-xs font-semibold">{subscription.durationLabel}</span>
                                                         </div>
 
-                                                        {/* Next Execution */}
                                                         <div className="flex justify-between items-center mb-0">
                                                             <div className="flex items-center gap-2 text-muted-foreground">
                                                                 <Clock className="h-3 w-3" />
@@ -982,7 +930,6 @@ export default function MySubscription() {
                                                             </span>
                                                         </div>
 
-                                                        {/* Progress */}
                                                         <div className="flex justify-between items-center">
                                                             <div className="flex items-center gap-2 text-muted-foreground">
                                                                 <RefreshCcw className="h-3 w-3" />
@@ -1010,7 +957,6 @@ export default function MySubscription() {
                                                             </div>
                                                         )}
 
-                                                        {/* Settings */}
                                                         {subscription.settings && (
                                                             <div className="pt-2 border-t border-border/50">
                                                                 <div className="flex justify-between items-center mb-1">
@@ -1024,7 +970,6 @@ export default function MySubscription() {
                                                             </div>
                                                         )}
 
-                                                        {/* Created Time */}
                                                         <div className="flex justify-between items-center pt-2 border-t border-border/50">
                                                             <span className="text-xs text-muted-foreground">Created:</span>
                                                             <span className="text-xs text-muted-foreground">
@@ -1032,7 +977,6 @@ export default function MySubscription() {
                                                             </span>
                                                         </div>
 
-                                                        {/* View Details Button */}
                                                         <div className="pt-3 border-t border-border/50">
                                                             <Button
                                                                 variant="outline"
@@ -1065,7 +1009,6 @@ export default function MySubscription() {
                     </div>
                 )}
 
-                {/* Pagination Component - hanya tampil jika ada lebih dari 1 page */}
                 {isConnected && !loading && totalPages > 1 && (
                     <Pagination>
                         <PaginationContent>
@@ -1090,7 +1033,6 @@ export default function MySubscription() {
                     </Pagination>
                 )}
 
-                {/* Info pagination */}
                 {isConnected && !loading && filteredSubscriptions.length > 0 && (
                     <div className="text-center text-xs text-muted-foreground mt-2">
                         Page {currentPage} of {totalPages} • {filteredSubscriptions.length} subscriptions total
@@ -1107,7 +1049,6 @@ export default function MySubscription() {
                 )}
             </motion.div>
 
-            {/* Confirmation Dialog */}
             <ConfirmationDialog
                 isOpen={cancelDialogOpen}
                 onClose={handleCloseCancelDialog}
@@ -1116,7 +1057,6 @@ export default function MySubscription() {
                 loading={cancelling}
             />
 
-            {/* Result Popup */}
             <ResultPopup
                 isOpen={resultPopup.open}
                 onClose={handleCloseResultPopup}
@@ -1124,7 +1064,6 @@ export default function MySubscription() {
                 message={resultPopup.message}
             />
 
-            {/* Subscription Detail Popup */}
             <SubscriptionDetailPopup
                 isOpen={detailPopupOpen}
                 onClose={handleCloseDetailPopup}

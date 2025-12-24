@@ -52,7 +52,7 @@ const DURATION_OPTIONS = [
     { label: "3 Years", value: "3years", days: 1095 }
 ];
 
-// 🎯 NEW: Error Popup Component
+// Error Popup Component
 function PopUpError({ open, onOpenChange, title, description, actionButton }) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,9 +108,8 @@ function PopUpError({ open, onOpenChange, title, description, actionButton }) {
     );
 }
 
-// 🎯 NEW: Success Popup Component
+// Success Popup Component
 function SuccessPopup({ open, onOpenChange, subscriptionData }) {
-    // Jika tidak ada data, jangan render apa-apa
     if (!subscriptionData) return null;
 
     const getFrequencyText = (frequency) => {
@@ -179,7 +178,6 @@ function SuccessPopup({ open, onOpenChange, subscriptionData }) {
                                     {subscriptionData.amount} {subscriptionData.fromToken?.symbol} → {subscriptionData.toToken?.symbol}
                                 </span>
                             </div>
-                            {/* Tambahkan kondisi untuk menampilkan hanya jika data ada */}
                             {subscriptionData.nextExecution && (
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Next Execution:</span>
@@ -215,7 +213,7 @@ function SuccessPopup({ open, onOpenChange, subscriptionData }) {
     );
 }
 
-// 🎯 NEW: Subscription Confirmation Popup Component
+// Subscription Confirmation Popup Component
 function SubscriptionConfirmationPopup({
     open,
     onOpenChange,
@@ -368,7 +366,7 @@ function SubscriptionConfirmationPopup({
     );
 }
 
-// Reusable Token Select Component (Enhanced with balances)
+// Reusable Token Select Component
 function TokenSelect({ selected, onChange, disabled, selectedAddress }) {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -629,14 +627,9 @@ export default function SubscribeSwap() {
     const [fromAmount, setFromAmount] = useState("");
     const [fromBalanceWallet, setFromBalance] = useState("0");
     const [toBalanceWallet, setToBalance] = useState("0");
-
-    // 🎯 PERUBAHAN: Hapus state untuk permission checking
     const [isSmartAccount, setIsSmartAccount] = useState(false);
-
     const [selectedFrequency, setSelectedFrequency] = useState("weekly");
     const [selectedDuration, setSelectedDuration] = useState("1month");
-
-    // Removed customInterval state
 
     const [settings, setSettings] = useState({
         slippage: 2,
@@ -645,14 +638,11 @@ export default function SubscribeSwap() {
     const [loading, setLoading] = useState(false);
     const [permissionLoading, setPermissionLoading] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
-
-    // 🎯 NEW: Popup states
     const [showConfirmationPopup, setShowConfirmationPopup] = useState(false);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorData, setErrorData] = useState({ title: "", description: "" });
     
-    // 🎯 NEW: State untuk menyimpan data sukses sebelum reset
     const [successData, setSuccessData] = useState(null);
 
     const { address, isConnected } = useAccount();
@@ -664,8 +654,6 @@ export default function SubscribeSwap() {
         if (!fromAmount || parseFloat(fromAmount) <= 0) return null;
 
         const amountPerSwap = parseFloat(fromAmount);
-
-        // Calculate frequency in seconds (sama seperti di createPermissionsForSubscription)
         let frequencyInSeconds = 0;
         switch (selectedFrequency) {
             case "hourly":
@@ -690,7 +678,6 @@ export default function SubscribeSwap() {
                 frequencyInSeconds = 604800;
         }
 
-        // Calculate total duration in seconds
         let totalDurationInSeconds = 0;
         const durationOption = DURATION_OPTIONS.find(d => d.value === selectedDuration);
 
@@ -698,14 +685,12 @@ export default function SubscribeSwap() {
             totalDurationInSeconds = 86400 * durationOption.days;
         }
 
-        // Validasi: frequency tidak boleh lebih besar dari total duration
         if (frequencyInSeconds > totalDurationInSeconds) {
             setDurationError(`Frequency interval (${selectedFrequency}) cannot be longer than total duration (${durationOption?.label}). Please select a shorter frequency or longer duration.`);
         } else {
             setDurationError("");
         }
 
-        // Hitung total eksekusi
         let totalExecutions = 0;
         if (frequencyInSeconds > 0 && totalDurationInSeconds > 0) {
             totalExecutions = Math.floor(totalDurationInSeconds / frequencyInSeconds);
@@ -762,7 +747,6 @@ export default function SubscribeSwap() {
         };
     }, [fromAmount, selectedFrequency, selectedDuration]);
 
-    // 🎯 PERUBAHAN: Check smart account status saja
     const getSmartAccountStatus = async () => {
         try {
             const stats = await isSmartAccountUpgraded();
@@ -773,7 +757,6 @@ export default function SubscribeSwap() {
         }
     };
 
-    // 🎯 PERUBAHAN: Create permissions for subscription (tetap dipakai saat konfirmasi)
     const createPermissionsForSubscription = async () => {
         try {
             const sessionAccountAddress = await getSessionAccountAddress();
@@ -811,7 +794,7 @@ export default function SubscribeSwap() {
             const durationOption = DURATION_OPTIONS.find(d => d.value === selectedDuration);
 
             if (durationOption && durationOption.days) {
-                totalDurationInSeconds = 86400 * durationOption.days; // Convert days to seconds
+                totalDurationInSeconds = 86400 * durationOption.days;
                 console.log(`Setting total duration to: ${durationOption.days} days (${totalDurationInSeconds} seconds)`);
             } else {
                 console.warn(`Duration option not found for: ${selectedDuration}, using 30 days as default`);
@@ -819,7 +802,7 @@ export default function SubscribeSwap() {
             }
 
             const startTime = Math.floor(Date.now() / 1000);
-            const expired = startTime + totalDurationInSeconds + 600; // add 10 second expired
+            const expired = startTime + totalDurationInSeconds + 600; 
 
             console.log(`Creating permission with frequency: ${selectedFrequency} (${frequencyInSeconds} seconds)`);
             console.log(`Total duration: ${totalDurationInSeconds} seconds (${durationOption?.days || 30} days)`);
@@ -830,7 +813,7 @@ export default function SubscribeSwap() {
                 token,
                 sessionAccountAddress.address,
                 amount,
-                frequencyInSeconds, // Parameter ke-4 adalah frequency (interval)
+                frequencyInSeconds,
                 startTime,
                 expired, 
                 justification,
@@ -874,7 +857,7 @@ export default function SubscribeSwap() {
         fetchBalances();
     }, [fromToken, toToken, address, isConnected, fromAmount]);
 
-    // 🎯 PERUBAHAN: Create subscription delegation dengan permissions
+    //Create subscription delegation dengan permissions
     const createSubscriptionDelegation = async (permissions) => {
         if (!address) return null;
 
@@ -897,7 +880,7 @@ export default function SubscribeSwap() {
             console.log("Creating subscription with data:", {
                 frequency: selectedFrequency,
                 duration: selectedDuration,
-                permissionDuration: permissions?.duration // Jika ada dalam permissions
+                permissionDuration: permissions?.duration
             });
 
             const res = await postSubscribeDelegationData({
@@ -913,7 +896,7 @@ export default function SubscribeSwap() {
         }
     };
 
-    // 🎯 PERUBAHAN: Main execution function - langsung buat permission saat konfirmasi
+    // Main execution function
     const executeSubscription = useCallback(async () => {
         if (!address) return;
 
@@ -921,7 +904,6 @@ export default function SubscribeSwap() {
         setShowConfirmationPopup(false);
 
         try {
-            // 1. Langsung buat permission
             const permissions = await createPermissionsForSubscription();
             if (!permissions) {
                 throw new Error("Failed to create permissions for subscription.");
@@ -930,11 +912,9 @@ export default function SubscribeSwap() {
             setPermissionLoading(false);
             setLoading(true);
 
-            // 2. Buat subscription delegation dengan permissions
             const result = await createSubscriptionDelegation(permissions);
 
             if (result && result.status === 'ok') {
-                // 🎯 PERUBAHAN: Simpan data sukses SEBELUM reset
                 const successData = {
                     frequency: selectedFrequency,
                     duration: selectedDuration,
@@ -945,13 +925,8 @@ export default function SubscribeSwap() {
                     totalExecutions: subscriptionSummary?.totalExecutions
                 };
                 
-                // Set success data ke state
                 setSuccessData(successData);
-                
-                // Show success popup
                 setShowSuccessPopup(true);
-                
-                // Reset form
                 resetAfterSubscription();
             } else if (result && result.message === 'duplicate_pair') {
                 setErrorData({
@@ -1011,7 +986,6 @@ export default function SubscribeSwap() {
         setFromAmount("");
     }, [fromToken, toToken]);
 
-    // 🎯 PERUBAHAN: Check if subscription is disabled - HAPUS pengecekan permission dan saldo
     const subscribeDisabled = useMemo(() => {
         if (!isSmartAccount) return true;
         if (!loggedIn) return true;
@@ -1028,7 +1002,6 @@ export default function SubscribeSwap() {
         return false;
     }, [isSmartAccount, loggedIn, isConnected, fromAmount, address, loading, permissionLoading, durationError, fromToken, toToken]);
 
-    // 🎯 PERUBAHAN: Handle subscription confirmation
     const handleSubscribe = useCallback(() => {
         if (subscribeDisabled) return;
         setShowConfirmationPopup(true);
@@ -1127,7 +1100,6 @@ export default function SubscribeSwap() {
                     </div>
                 </div>
 
-                {/* 🎯 PERUBAHAN: HAPUS tampilan informasi permission */}
                 {fromToken?.address === toToken?.address && (
                     <Alert className="mt-2 bg-yellow-500/10 border-yellow-500/20 mb-4">
                         <AlertCircle className="h-4 w-4 text-yellow-500" />
@@ -1230,7 +1202,6 @@ export default function SubscribeSwap() {
                     </motion.div>
                 )}
 
-                {/* 🎯 PERUBAHAN: HAPUS tombol Grant Permissions terpisah */}
                 <Button
                     onClick={handleSubscribe}
                     disabled={subscribeDisabled}
@@ -1286,11 +1257,10 @@ export default function SubscribeSwap() {
                 onOpenChange={(open) => {
                     setShowSuccessPopup(open);
                     if (!open) {
-                        // Reset success data ketika popup ditutup
                         setSuccessData(null);
                     }
                 }}
-                subscriptionData={successData}  // Gunakan state successData
+                subscriptionData={successData}
             />
 
             <PopUpError
