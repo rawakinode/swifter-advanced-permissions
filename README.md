@@ -30,6 +30,108 @@ Swiffer AP is a revolutionary swap platform that leverage Smart Account powered 
 - **Smart Balance Management**: Automatic execution with balance verification
 - **Progress Tracking**: Real-time monitoring of subscription executions and remaining swaps
 
+## 🔐 Advanced Permissions Usage
+
+Since the Hackathon is focused on the Advanced Permissions (ERC-7715), below are the code usage links for requesting and redeeming Advanced Permissions.
+
+### Request Advanced Permissions
+
+The implementation for requesting Advanced Permissions from users can be found in:
+
+**Code Location**: [`src/hooks/useAdvancedPermissions.js`](src/hooks/useAdvancedPermissions.js#L7-L59)
+
+**Key Function**: `createAdvancedPermissions()`
+
+This function:
+- Creates periodic token permissions (ERC20 or native token)
+- Uses `walletClient.requestExecutionPermissions()` to request permissions from MetaMask
+- Supports customizable parameters: amount, period duration, expiry, and adjustment allowance
+- Returns granted permissions that are stored and used for swap execution
+
+```javascript
+const grantedPermissions = await walletClient.requestExecutionPermissions([{
+    chainId: chain.id,
+    expiry: expired,
+    signer: {
+        type: "account",
+        data: {
+            address: sessionAccountAddress,
+        },
+    },
+    permission: {
+        type: "erc20-token-periodic", // or "native-token-periodic"
+        data: {
+            tokenAddress,
+            periodAmount: parseUnits(amount, token.decimals),
+            periodDuration: duration,
+            justification: justification,
+        },
+    },
+    isAdjustmentAllowed: isAdjustmentAllowed,
+}]);
+```
+
+### Redeem Advanced Permissions
+
+The implementation for redeeming/using Advanced Permissions to execute transactions can be found in:
+
+**Direct Swap**: [`backend/index.js`](backend/index.js#L852-L928)
+- Uses `permissionsContext` and `delegationManager` from stored permissions
+- Executes via `bundlerClient.sendUserOperationWithDelegation()`
+
+**Price-Targeted Swap**: [`backend/bot_price_swifter_ap.js`](backend/bot_price_swifter_ap.js#L117-L162)
+- Redeems permissions for price-targeted swap execution
+- Uses stored permission context from database
+
+**Scheduled Swap**: [`backend/bot_scheduled_swifter_ap.js`](backend/bot_scheduled_swifter_ap.js#L126-L166)
+- Redeems permissions for scheduled swap execution
+- Automatically executes at specified time using permission context
+
+**Auto Subscription Swap**: [`backend/bot_autobuy_swifter_ap.js`](backend/bot_autobuy_swifter_ap.js#L340-L385)
+- Redeems permissions for recurring subscription swaps
+- Uses periodic permission context for each execution interval
+
+**Key Implementation Pattern**:
+```javascript
+let calls = [];
+
+// if swap from ERC20 tokens
+calls.push({
+    to: tokenAddress, //token address
+    data: calldata, // transfer call data
+    permissionsContext: permission[0].context,
+    delegationManager: permission[0].signerMeta.delegationManager,
+});
+
+// if swap from NATIVE ETH
+// native token transfer
+calls.push({
+    to: sessionAccount.address,
+    value: parseEther(task.from_amount.toString()),
+    data: "0x",
+    permissionsContext: task.permission[0].context,
+    delegationManager: task.permission[0].signerMeta.delegationManager,
+});
+
+// This operations will excecute transfer from user to session account, approve token (if erc 20 swap) , and swap in single transaction
+const userOperationHash = await bundlerClient.sendUserOperationWithDelegation({
+    publicClient,
+    account: sessionAccount,
+    calls,
+    ...userOperationGasPrice,
+});
+```
+
+### How Advanced Permissions Enhanced User Experience
+
+1. **Seamless Permission Management**: Users grant permissions once and can use them for multiple swaps without repeated approvals
+2. **Customizable Permissions**: For direct swaps, users can set custom amounts, periods, and expiry dates
+3. **Automatic Permission Creation**: For automated swaps, permissions are created automatically based on swap parameters
+4. **Permission Tracking**: Real-time visibility of remaining permission amounts
+5. **Session Account Isolation**: Each user has isolated session accounts with dedicated permissions for enhanced security
+
+---
+
 ## ⚡ Core Workflows
 
 ### 1️⃣ Direct Swap (Immediately) Flow
@@ -682,3 +784,20 @@ WETH = "0xfff9976782d46cc05630d1f6ebab18b2324d6b14";
 - **Security**: Granular permission control with per-user session account isolation
 - **Flexibility**: Customizable permissions for direct swaps, automatic permissions for automated swaps
 - **Efficiency**: Reusable permissions for multiple direct swaps without repeated approvals
+
+---
+
+## 📊 Envio Usage
+
+*Note: This project does not currently use Envio. If Envio integration is planned for future development, this section will be updated accordingly.*
+
+---
+
+## 💬 Feedback
+
+
+---
+
+## 🌐 Social Media
+
+[X Tweet](https://x.com/rawakinode/status/2003711164518371530)
