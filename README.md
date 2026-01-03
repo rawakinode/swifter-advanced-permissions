@@ -152,15 +152,20 @@ const userOperationHash = await bundlerClient.sendUserOperationWithDelegation({
 });
 ```
 
-### Single Transaction (Atomic Execution)
-This approach executes **token/ETH transfer, token approval (if ERC20), and swap in one single transaction**.
-Because it is atomic, all actions must succeed together or the entire transaction fails.
+### ⚡ Single Transaction (Atomic Execution)
+All actions (transfer, approve, and swap) are executed in a single transaction.
 
-If the **swap fails** for any reason, **no token or ETH will be transferred from the user, no allowance will be added, and the session account will not receive any funds**. This completely avoids the risk of funds being stuck in the session account, which commonly happens when transfer, approve, and swap are sent as separate transactions.
+If any step fails, the entire transaction is reverted.
+No funds move, no allowance is added, and the session account stays safe.
 
-Compared to multi-transaction flows, this design provides stronger fund safety, consistent on-chain state, and better user experience. The user only signs once, gas usage is lower, and there is no partial execution or recovery needed.
+**Advantages**
 
-This is especially **important** for session accounts and delegated execution, where permissions and execution context must remain consistent and secure throughout the swap process.
+- 🛡️ Stronger fund safety (no stuck funds)
+- ✍️ Single signature
+- ⛽ Lower gas fees
+- 🔗 Consistent on-chain state
+
+This approach is ideal for session accounts and delegated execution, ensuring secure and consistent execution.
 
 ### How Advanced Permissions Enhanced User Experience
 
