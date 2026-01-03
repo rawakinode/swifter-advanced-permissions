@@ -100,7 +100,7 @@ The implementation for redeeming/using Advanced Permissions to execute transacti
 - Redeems permissions for recurring subscription swaps
 - Uses periodic permission context for each execution interval
 
-**Key Implementation Pattern**:
+**Session Account Generate:**
 ```javascript
 
 // Function for generate unique session smart account
@@ -118,6 +118,9 @@ export const sessionSmartAccount = async (salt) => {
     });
     return sessionAccount;
 }
+```
+**Multi Call Data for Single Transaction:**
+```javascript
 
 // Prepare call data for Redeem Permission -> Token Approval to Uniswap Contract -> Swap Call Data
 let calls = [];
@@ -148,6 +151,16 @@ const userOperationHash = await bundlerClient.sendUserOperationWithDelegation({
     ...userOperationGasPrice,
 });
 ```
+
+### Single Transaction (Atomic Execution)
+This approach executes **token/ETH transfer, token approval (if ERC20), and swap in one single transaction**.
+Because it is atomic, all actions must succeed together or the entire transaction fails.
+
+If the **swap fails** for any reason, **no token or ETH will be transferred from the user, no allowance will be added, and the session account will not receive any funds**. This completely avoids the risk of funds being stuck in the session account, which commonly happens when transfer, approve, and swap are sent as separate transactions.
+
+Compared to multi-transaction flows, this design provides stronger fund safety, consistent on-chain state, and better user experience. The user only signs once, gas usage is lower, and there is no partial execution or recovery needed.
+
+This is especially **important** for session accounts and delegated execution, where permissions and execution context must remain consistent and secure throughout the swap process.
 
 ### How Advanced Permissions Enhanced User Experience
 
