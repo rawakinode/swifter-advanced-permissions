@@ -93,6 +93,24 @@ The implementation for redeeming/using Advanced Permissions to execute transacti
 
 **Key Implementation Pattern**:
 ```javascript
+
+// Function for generate unique session smart account
+// Using salt = user wallet address
+export const sessionSmartAccount = async (salt) => {
+    const private_key = process.env.SESSION_MANAGER_SECRET_KEY;
+    const account = privateKeyToAccount(private_key, { chain });
+
+    const sessionAccount = await toMetaMaskSmartAccount({
+        client: publicClient,
+        implementation: Implementation.Hybrid,
+        deployParams: [account.address, [], [], []],
+        deploySalt: salt,
+        signer: { account },
+    });
+    return sessionAccount;
+}
+
+// Prepare call data for Redeem Permission -> Token Approval to Uniswap Contract -> Swap Call Data
 let calls = [];
 
 // if swap from ERC20 tokens
