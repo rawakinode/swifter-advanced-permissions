@@ -3,6 +3,15 @@
 ## 📋 Executive Summary
 Swiffer AP is a revolutionary swap platform that leverage Smart Account powered by Metamask Advanced Permission (ERC-7715), built on the Ethereum (testnet). The platform delivers a secure, gas-efficient, and flexible automated trading experience with **four main swap modes**: Direct swap, Scheduled swap, Price-targeted swap, and Auto-subscription.
 
+## 🏆 Prize Track
+
+🥇 **Best Integration – Existing Project**
+
+**Swifter AP** is an existing project adapted and further developed from my previous project called **Swifter**.
+
+Reference:
+https://github.com/rawakinode/frontend
+
 ## 🎯 Core Features
 
 ### 1. Direct Swap
