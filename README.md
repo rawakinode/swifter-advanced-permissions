@@ -8,9 +8,9 @@ Swiffer AP is a revolutionary swap platform that leverage Smart Account powered 
 🥇 **Best Integration – Existing Project**
 
 **Swifter AP** is an existing project adapted and further developed from my previous project called **Swifter**.
+Old Repository: https://github.com/rawakinode/frontend
 
-Reference:
-https://github.com/rawakinode/frontend
+🥇 **Most creative use of Advanced Permissions**
 
 ## 🎯 Core Features
 
